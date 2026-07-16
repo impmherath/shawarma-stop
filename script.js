@@ -25,7 +25,7 @@
   // TODO: replace with your real WhatsApp Business number.
   // Format: country code + number, digits only, no "+", no spaces.
   const WHATSAPP_NUMBER = '94712345678';
-  const CURRENCY = '$';
+  const CURRENCY = 'Rs.';
 
   // ------------------------------------------------------------------------
   // CART STATE
@@ -85,9 +85,9 @@
     return getItems().reduce((sum, i) => sum + i.qty * i.price, 0);
   }
 
-  // Formats a number as "$1,250" — whole dollars, thousands separator.
+  // Formats a number as e.g. "Rs.1,250.75" — keeps decimals, adds thousands separator.
   function money(amount) {
-    return `${CURRENCY}${Math.round(amount).toLocaleString('en-US')}`;
+    return `${CURRENCY}${amount.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
   // ------------------------------------------------------------------------
