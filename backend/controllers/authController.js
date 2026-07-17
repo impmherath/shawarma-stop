@@ -25,12 +25,17 @@ function cookieOptions() {
 const login = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
 
-  const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+  const [rows] = await db.query(
+    'SELECT * FROM users WHERE username = ?',
+    [username]
+);
+
+const user = rows[0];
   if (!user) {
     return res.status(401).json({ error: 'Invalid username or password.' });
   }
 
-  const passwordOk = await bcrypt.compare(password, user.password_hash);
+  const passwordOk = await bcrypt.compare(password, user.password);
   if (!passwordOk) {
     return res.status(401).json({ error: 'Invalid username or password.' });
   }

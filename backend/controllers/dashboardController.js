@@ -5,29 +5,48 @@ const db = require('../config/db');
 const asyncHandler = require('../middleware/asyncHandler');
 
 const stats = asyncHandler(async (req, res) => {
-  const totalProducts = db.prepare('SELECT COUNT(*) AS n FROM products').get().n;
-  const totalCategories = db.prepare('SELECT COUNT(*) AS n FROM categories').get().n;
-  const totalOrders = db.prepare('SELECT COUNT(*) AS n FROM orders').get().n;
-  const todaysOrders = db
-    .prepare(`SELECT COUNT(*) AS n FROM orders WHERE date(created_at) = date('now')`)
-    .get().n;
 
-  const ordersByStatus = db
-    .prepare(`SELECT status, COUNT(*) AS count FROM orders GROUP BY status`)
-    .all();
+  const [products] = await db.query(
+    'SELECT COUNT(*) AS n FROM products'
+  );
 
-  const recentOrders = db
-    .prepare(`SELECT id, customer_name, status, total, created_at FROM orders ORDER BY created_at DESC LIMIT 5`)
-    .all();
+  const [categories] = await db.query(
+    'SELECT COUNT(*) AS n FROM categories'
+  );
+
+  const [orders] = await db.query(
+    'SELECT COUNT(*) AS n FROM orders'
+  );
+
+  const [todays] = await db.query(
+    `SELECT COUNT(*) AS n 
+     FROM orders 
+     WHERE DATE(created_at) = CURDATE()`
+  );
+
+  const [ordersByStatus] = await db.query(
+    `SELECT status, COUNT(*) AS count 
+     FROM orders 
+     GROUP BY status`
+  );
+
+  const [recentOrders] = await db.query(
+    `SELECT id, customer_name, status, total_amount, created_at 
+     FROM orders 
+     ORDER BY created_at DESC 
+     LIMIT 5`
+  );
+
 
   res.json({
-    totalProducts,
-    totalCategories,
-    totalOrders,
-    todaysOrders,
+    totalProducts: products[0].n,
+    totalCategories: categories[0].n,
+    totalOrders: orders[0].n,
+    todaysOrders: todays[0].n,
     ordersByStatus,
     recentOrders,
   });
+
 });
 
 module.exports = { stats };

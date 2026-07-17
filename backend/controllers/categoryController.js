@@ -3,31 +3,25 @@
  * Handles Category CRUD operations
  */
 
-const slugify = require("slugify");
 const db = require("../config/db");
 const asyncHandler = require("../middleware/asyncHandler");
 
 
-// @desc    Get all categories
-// @route   GET /api/categories
-// @access  Admin
+// GET ALL CATEGORIES
 const list = asyncHandler(async (req, res) => {
 
-    const categories = db
-        .prepare(
-            `
-            SELECT 
-                c.*,
-                COUNT(p.id) AS product_count
-            FROM categories c
-            LEFT JOIN products p 
-                ON p.category_id = c.id
-            GROUP BY c.id
-            ORDER BY c.name ASC
-            `
-        )
-        .all();
-
+    const [categories] = await db.query(
+        `
+        SELECT 
+            c.*,
+            COUNT(p.id) AS product_count
+        FROM categories c
+        LEFT JOIN products p 
+            ON p.category_id = c.id
+        GROUP BY c.id
+        ORDER BY c.name ASC
+        `
+    );
 
     res.json({
         categories
@@ -36,226 +30,139 @@ const list = asyncHandler(async (req, res) => {
 });
 
 
-
-// @desc    Create category
-// @route   POST /api/categories
-// @access  Admin
+// CREATE CATEGORY
 const create = asyncHandler(async (req, res) => {
 
     const { name } = req.body;
 
 
     if (!name || name.trim() === "") {
-
         return res.status(400).json({
             error: "Category name is required"
         });
-
     }
 
 
     const cleanName = name.trim();
 
 
-    const slug = slugify(cleanName, {
-        lower: true,
-        strict: true
-    });
+    const [existing] = await db.query(
+        "SELECT id FROM categories WHERE name = ?",
+        [cleanName]
+    );
 
 
-
-    const existing = db
-        .prepare(
-            "SELECT id FROM categories WHERE slug = ?"
-        )
-        .get(slug);
-
-
-
-    if (existing) {
-
+    if (existing.length > 0) {
         return res.status(409).json({
             error: "Category already exists"
         });
-
     }
 
 
-
-    const result = db
-        .prepare(
-            `
-            INSERT INTO categories
-            (name, slug)
-            VALUES (?, ?)
-            `
-        )
-        .run(
-            cleanName,
-            slug
-        );
+    const [result] = await db.query(
+        "INSERT INTO categories (name) VALUES (?)",
+        [cleanName]
+    );
 
 
-
-    const category = db
-        .prepare(
-            "SELECT * FROM categories WHERE id = ?"
-        )
-        .get(
-            result.lastInsertRowid
-        );
-
+    const [category] = await db.query(
+        "SELECT * FROM categories WHERE id = ?",
+        [result.insertId]
+    );
 
 
     res.status(201).json({
-        category
+        category: category[0]
     });
 
 });
 
 
-
-// @desc    Update category
-// @route   PUT /api/categories/:id
-// @access  Admin
+// UPDATE CATEGORY
 const update = asyncHandler(async (req, res) => {
 
     const { id } = req.params;
     const { name } = req.body;
 
 
-
     if (!name || name.trim() === "") {
-
         return res.status(400).json({
             error: "Category name is required"
         });
-
     }
-
-
-
-    const category = db
-        .prepare(
-            "SELECT * FROM categories WHERE id = ?"
-        )
-        .get(id);
-
-
-
-    if (!category) {
-
-        return res.status(404).json({
-            error: "Category not found"
-        });
-
-    }
-
 
 
     const cleanName = name.trim();
 
 
-    const slug = slugify(cleanName, {
-        lower: true,
-        strict: true
-    });
-
-
-
-    const duplicate = db
-        .prepare(
-            `
-            SELECT id 
-            FROM categories 
-            WHERE slug = ? 
-            AND id != ?
-            `
-        )
-        .get(
-            slug,
-            id
-        );
-
-
-
-    if (duplicate) {
-
-        return res.status(409).json({
-            error: "Category already exists"
-        });
-
-    }
-
-
-
-    db.prepare(
-        `
-        UPDATE categories
-        SET 
-            name = ?,
-            slug = ?,
-            updated_at = datetime('now')
-        WHERE id = ?
-        `
-    )
-    .run(
-        cleanName,
-        slug,
-        id
+    const [category] = await db.query(
+        "SELECT * FROM categories WHERE id = ?",
+        [id]
     );
 
 
+    if (category.length === 0) {
+        return res.status(404).json({
+            error: "Category not found"
+        });
+    }
 
-    const updatedCategory = db
-        .prepare(
-            "SELECT * FROM categories WHERE id = ?"
-        )
-        .get(id);
 
+    const [duplicate] = await db.query(
+        "SELECT id FROM categories WHERE name = ? AND id != ?",
+        [cleanName, id]
+    );
+
+
+    if (duplicate.length > 0) {
+        return res.status(409).json({
+            error: "Category already exists"
+        });
+    }
+
+
+    await db.query(
+        "UPDATE categories SET name = ? WHERE id = ?",
+        [cleanName, id]
+    );
+
+
+    const [updated] = await db.query(
+        "SELECT * FROM categories WHERE id = ?",
+        [id]
+    );
 
 
     res.json({
-        category: updatedCategory
+        category: updated[0]
     });
 
 });
 
 
-
-
-// @desc    Delete category
-// @route   DELETE /api/categories/:id
-// @access  Admin
+// DELETE CATEGORY
 const remove = asyncHandler(async (req, res) => {
 
     const { id } = req.params;
 
 
-
-    const category = db
-        .prepare(
-            "SELECT * FROM categories WHERE id = ?"
-        )
-        .get(id);
+    const [category] = await db.query(
+        "SELECT * FROM categories WHERE id = ?",
+        [id]
+    );
 
 
-
-    if (!category) {
-
+    if (category.length === 0) {
         return res.status(404).json({
             error: "Category not found"
         });
-
     }
 
 
-
-    db.prepare(
-        "DELETE FROM categories WHERE id = ?"
-    )
-    .run(id);
-
+    await db.query(
+        "DELETE FROM categories WHERE id = ?",
+        [id]
+    );
 
 
     res.json({
@@ -264,7 +171,6 @@ const remove = asyncHandler(async (req, res) => {
     });
 
 });
-
 
 
 module.exports = {

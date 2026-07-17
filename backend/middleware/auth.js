@@ -6,7 +6,9 @@ const COOKIE_NAME = "token";
 
 const requireAuth = (req, res, next) => {
 
-    const token = req.headers.authorization;
+    const token =
+    req.cookies[COOKIE_NAME] ||
+    req.headers.authorization;
 
 
     if (!token) {

@@ -1,123 +1,330 @@
-/**
- * Orders — admin-facing management (list/search/filter/status/delete)
- * plus a public endpoint the storefront calls to save an order record
- * at the same moment it opens WhatsApp, so the admin dashboard has a
- * real log of orders instead of relying on WhatsApp alone.
- */
 const db = require('../config/db');
 const asyncHandler = require('../middleware/asyncHandler');
 
+
 function serializeOrder(order, items) {
-  return {
-    id: order.id,
-    customerName: order.customer_name,
-    phone: order.phone,
-    address: order.address,
-    note: order.note,
-    status: order.status,
-    total: order.total,
-    source: order.source,
-    createdAt: order.created_at,
-    updatedAt: order.updated_at,
-    items: items.map((i) => ({
-      productName: i.product_name,
-      quantity: i.quantity,
-      unitPrice: i.unit_price,
-      subtotal: i.subtotal,
-    })),
-  };
+
+    return {
+        id: order.id,
+        customerName: order.customer_name,
+        phone: order.phone,
+        address: order.address,
+        note: order.note,
+        status: order.status,
+        total: order.total,
+        source: order.source,
+        createdAt: order.created_at,
+
+        items: items.map(item => ({
+    productId: item.product_id,
+    productName: item.product_name,
+    quantity: item.quantity,
+    unitPrice: item.price,
+    subtotal: item.quantity * item.price
+}))
+    };
+
 }
 
-const getItemsStmt = db.prepare('SELECT * FROM order_items WHERE order_id = ? ORDER BY id ASC');
 
-// ---- Admin endpoints -------------------------------------------------
+// GET ALL ORDERS
+const list = asyncHandler(async(req,res)=>{
 
-const list = asyncHandler(async (req, res) => {
-  const { search, status, dateFrom, dateTo } = req.query;
-  const clauses = [];
-  const params = [];
+    const {search,status}=req.query;
 
-  if (search) {
-    clauses.push('(customer_name LIKE ? OR phone LIKE ? OR address LIKE ?)');
-    params.push(`%${search}%`, `%${search}%`, `%${search}%`);
-  }
-  if (status) {
-    clauses.push('status = ?');
-    params.push(status);
-  }
-  if (dateFrom) {
-    clauses.push('date(created_at) >= date(?)');
-    params.push(dateFrom);
-  }
-  if (dateTo) {
-    clauses.push('date(created_at) <= date(?)');
-    params.push(dateTo);
-  }
 
-  const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
-  const orders = db.prepare(`SELECT * FROM orders ${where} ORDER BY created_at DESC`).all(...params);
+    let sql = `
+        SELECT * FROM orders
+    `;
 
-  const withItems = orders.map((o) => serializeOrder(o, getItemsStmt.all(o.id)));
-  res.json({ orders: withItems });
-});
+    let params=[];
 
-const getOne = asyncHandler(async (req, res) => {
-  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
-  if (!order) return res.status(404).json({ error: 'Order not found.' });
-  res.json({ order: serializeOrder(order, getItemsStmt.all(order.id)) });
-});
 
-const updateStatus = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
+    let conditions=[];
 
-  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);
-  if (!order) return res.status(404).json({ error: 'Order not found.' });
 
-  db.prepare(`UPDATE orders SET status = ?, updated_at = datetime('now') WHERE id = ?`).run(status, id);
+    if(search){
 
-  const updated = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);
-  res.json({ order: serializeOrder(updated, getItemsStmt.all(id)) });
-});
+        conditions.push(
+            `(customer_name LIKE ? OR phone LIKE ? OR address LIKE ?)`
+        );
 
-const remove = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);
-  if (!order) return res.status(404).json({ error: 'Order not found.' });
+        params.push(
+            `%${search}%`,
+            `%${search}%`,
+            `%${search}%`
+        );
 
-  db.prepare('DELETE FROM orders WHERE id = ?').run(id); // order_items cascade
-  res.json({ success: true });
-});
-
-// ---- Public endpoint ---------------------------------------------------
-// Called by the storefront's checkout flow right before it opens WhatsApp.
-// Intentionally has no auth — it's the public "place an order" action —
-// but is fully validated (see utils/validators.js#publicOrderRules) and
-// rate-limited in server.js to prevent abuse.
-
-const createPublic = asyncHandler(async (req, res) => {
-  const { customerName, phone, address, note = '', items } = req.body;
-
-  const total = items.reduce((sum, i) => sum + i.quantity * i.unitPrice, 0);
-
-  const insertOrder = db.prepare(
-    `INSERT INTO orders (customer_name, phone, address, note, total, source)
-     VALUES (?, ?, ?, ?, ?, 'website')`
-  );
-  const insertItem = db.prepare(
-    `INSERT INTO order_items (order_id, product_name, quantity, unit_price, subtotal)
-     VALUES (?, ?, ?, ?, ?)`
-  );
-
-  const orderId = db.transaction(() => {
-    const result = insertOrder.run(customerName, phone, address, note, total);
-    for (const item of items) {
-      insertItem.run(result.lastInsertRowid, item.name, item.quantity, item.unitPrice, item.quantity * item.unitPrice);
     }
-    return result.lastInsertRowid;
-  })();
 
-  res.status(201).json({ orderId });
+
+    if(status){
+
+        conditions.push(
+            "status=?"
+        );
+
+        params.push(status);
+
+    }
+
+
+    if(conditions.length){
+
+        sql += " WHERE " + conditions.join(" AND ");
+
+    }
+
+
+    sql += " ORDER BY created_at DESC";
+
+
+    const [orders] = await db.query(sql,params);
+
+
+    const result=[];
+
+
+  for(const order of orders){
+
+    const [items] = await db.query(
+    `
+    SELECT 
+        oi.product_id,
+        p.name AS product_name,
+        oi.quantity,
+        oi.price
+    FROM order_items oi
+    LEFT JOIN products p 
+    ON oi.product_id = p.id
+    WHERE oi.order_id=?
+    ORDER BY oi.id ASC
+    `,
+    [order.id]
+    );
+
+
+    result.push(
+        serializeOrder(order,items)
+    );
+
+}
+
+
+    res.json({
+        success:true,
+        orders:result
+    });
+
+
 });
 
-module.exports = { list, getOne, updateStatus, remove, createPublic };
+
+
+// GET SINGLE ORDER
+const getOne = asyncHandler(async(req,res)=>{
+
+
+    const [orders]=await db.query(
+        "SELECT * FROM orders WHERE id=?",
+        [req.params.id]
+    );
+
+
+    if(!orders.length){
+
+        return res.status(404).json({
+            message:"Order not found"
+        });
+
+    }
+
+
+    const [items]=await db.query(
+`
+SELECT 
+    oi.product_id,
+    p.name AS product_name,
+    oi.quantity,
+    oi.price
+FROM order_items oi
+LEFT JOIN products p 
+ON oi.product_id = p.id
+WHERE oi.order_id=?
+`,
+[req.params.id]
+);
+
+
+    res.json({
+        success:true,
+        order:serializeOrder(
+            orders[0],
+            items
+        )
+    });
+
+
+});
+
+
+
+
+// UPDATE STATUS
+const updateStatus = asyncHandler(async(req,res)=>{
+
+
+    const {status}=req.body;
+
+
+    await db.query(
+        "UPDATE orders SET status=? WHERE id=?",
+        [
+            status,
+            req.params.id
+        ]
+    );
+
+
+    res.json({
+        success:true,
+        message:"Status updated"
+    });
+
+
+});
+
+
+
+
+// DELETE ORDER
+const remove = asyncHandler(async(req,res)=>{
+
+
+    await db.query(
+        "DELETE FROM order_items WHERE order_id=?",
+        [req.params.id]
+    );
+
+
+    await db.query(
+        "DELETE FROM orders WHERE id=?",
+        [req.params.id]
+    );
+
+
+    res.json({
+        success:true,
+        message:"Order deleted"
+    });
+
+
+});
+
+
+
+
+// CREATE PUBLIC ORDER
+const createPublic = asyncHandler(async(req,res)=>{
+
+
+    const {
+        customerName,
+        phone,
+        address,
+        note="",
+        items
+    }=req.body;
+
+
+    if(!items || items.length===0){
+
+        return res.status(400).json({
+            message:"Items required"
+        });
+
+    }
+
+
+    const total = items.reduce(
+        (sum,item)=>
+        sum + item.quantity * item.unitPrice,
+        0
+    );
+
+
+    const connection=await db.getConnection();
+
+
+    try{
+
+        await connection.beginTransaction();
+
+
+    await connection.query(
+    `
+    INSERT INTO order_items
+    (order_id,product_id,quantity,price)
+    VALUES(?,?,?,?)
+    `,
+    [
+        order.insertId,
+        item.productId,
+        item.quantity,
+        item.unitPrice
+    ]
+);
+
+
+        for(const item of items){
+
+            await connection.query(
+                `
+                INSERT INTO order_items
+                (order_id,product_name,quantity,unit_price,subtotal)
+                VALUES(?,?,?,?,?)
+                `,
+                [
+                    order.insertId,
+                    item.name,
+                    item.quantity,
+                    item.unitPrice,
+                    item.quantity*item.unitPrice
+                ]
+            );
+
+        }
+
+
+        await connection.commit();
+
+
+        res.status(201).json({
+            success:true,
+            orderId:order.insertId
+        });
+
+
+    }catch(error){
+
+        await connection.rollback();
+        throw error;
+
+    }finally{
+
+        connection.release();
+
+    }
+
+
+});
+
+
+
+module.exports={
+    list,
+    getOne,
+    updateStatus,
+    remove,
+    createPublic
+};
