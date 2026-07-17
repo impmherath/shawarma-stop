@@ -1,0 +1,127 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+
+body{
+    background:#f5f5f5;
+}
+
+
+/* LOGIN */
+
+.login-container{
+
+    width:350px;
+    margin:120px auto;
+    background:white;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.15);
+
+}
+
+
+.login-container h2{
+
+    text-align:center;
+    margin-bottom:25px;
+
+}
+
+
+.login-container input{
+
+    width:100%;
+    padding:12px;
+    margin-bottom:15px;
+    border:1px solid #ddd;
+    border-radius:5px;
+
+}
+
+
+.login-container button{
+
+    width:100%;
+    padding:12px;
+    background:#d35400;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:16px;
+
+}
+
+
+.login-container button:hover{
+
+    background:#e67e22;
+
+}
+
+
+#message{
+
+    text-align:center;
+    margin-top:15px;
+    color:red;
+
+}
+.dashboard{
+
+    padding:30px;
+
+}
+
+
+.cards{
+
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    margin:30px 0;
+
+}
+
+
+.card{
+
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    text-align:center;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+
+}
+
+
+.card p{
+
+    font-size:30px;
+    font-weight:bold;
+    color:#d35400;
+
+}
+
+
+table{
+
+    width:100%;
+    background:white;
+    border-collapse:collapse;
+
+}
+
+
+th,td{
+
+    padding:12px;
+    border-bottom:1px solid #ddd;
+    text-align:left;
+
+}
