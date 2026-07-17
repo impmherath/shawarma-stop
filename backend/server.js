@@ -1,72 +1,58 @@
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const app = express();
 
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: true,
+    credentials: true
+}));
+
 app.use(express.json());
+app.use(cookieParser());
 
 
-// Image folder access
-app.use(
-    "/uploads",
-    express.static("uploads")
-);
+// Database
+require("./config/db");
 
 
 // Routes
-
-app.use(
-    "/api/auth",
-    require("./routes/auth.routes")
-);
-
-
-app.use(
-    "/api/categories",
-    require("./routes/category.routes")
-);
+const authRoutes = require("./routes/auth.routes");
+const categoryRoutes = require("./routes/category.routes");
+const productRoutes = require("./routes/product.routes");
+const orderRoutes = require("./routes/order.routes");
+const dashboardRoutes = require("./routes/dashboard.routes");
 
 
-app.use(
-    "/api/products",
-    require("./routes/product.routes")
-);
+// API Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 
-app.use(
-    "/api/orders",
-    require("./routes/order.routes")
-);
-
-
-app.use(
-    "/api/dashboard",
-    require("./routes/dashboard.routes")
-);
-
-
-
-app.get("/", (req,res)=>{
-
-    res.send("Shawarma Stop Backend Running");
-
+// Home route
+app.get("/", (req, res) => {
+    res.json({
+        message: "Shawarma Stop API Running"
+    });
 });
 
 
+// Error handler
+const errorHandler = require("./middleware/errorHandler");
+app.use(errorHandler);
 
-// Server Start
+
 
 const PORT = process.env.PORT || 5000;
 
 
-app.listen(PORT,()=>{
-
-    console.log(
-        `Server running on port ${PORT}`
-    );
-
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
