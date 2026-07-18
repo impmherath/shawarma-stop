@@ -12,6 +12,17 @@ const {
 } = require("../utils/imageProcessor");
 
 
+function getThumbnailPath(imagePath) {
+
+    if (!imagePath) {
+        return null;
+    }
+
+    return imagePath.replace("-full.jpg", "-thumb.jpg");
+
+}
+
+
 function serializeProduct(row) {
 
     return {
@@ -230,7 +241,8 @@ const update = asyncHandler(async(req,res)=>{
 
         if(existing.image){
             await deleteProductImages({
-                full: existing.image
+                full: existing.image,
+                thumb: getThumbnailPath(existing.image)
             });
         }
 
@@ -300,7 +312,8 @@ const remove = asyncHandler(async(req,res)=>{
 
     if (rows[0].image) {
         await deleteProductImages({
-            full: rows[0].image
+            full: rows[0].image,
+            thumb: getThumbnailPath(rows[0].image)
         });
     }
 

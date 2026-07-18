@@ -1,5 +1,7 @@
 (function () {
-    const backendOrigin = `${window.location.protocol}//${window.location.hostname}:5000`;
+    const backendHost = window.location.hostname || "127.0.0.1";
+    const backendProtocol = window.location.protocol === "file:" ? "http:" : window.location.protocol;
+    const backendOrigin = `${backendProtocol}//${backendHost}:5000`;
     const apiBase = `${backendOrigin}/api`;
     const assetBase = backendOrigin;
 

@@ -4,6 +4,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         AdminApp.bindLogout();
         AdminApp.setActiveNav("dashboard.html");
         await loadDashboard();
+
+        setInterval(() => {
+            loadDashboard().catch((error) => console.error(error));
+        }, 60000);
     } catch (error) {
         console.error(error);
     }
@@ -12,6 +16,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function loadDashboard() {
     const recentOrdersTable = document.getElementById("recentOrdersTable");
     const statusBreakdown = document.getElementById("statusBreakdown");
+
+    if (recentOrdersTable) {
+        recentOrdersTable.innerHTML = `<tr><td colspan="5"><div class="loading-state"><div class="spinner"></div><p>Loading recent orders</p></div></td></tr>`;
+    }
+
+    if (statusBreakdown) {
+        statusBreakdown.innerHTML = `<div class="loading-state"><div class="spinner"></div><p>Loading status summary</p></div>`;
+    }
 
     try {
         const data = await AdminApp.request("/dashboard/stats", {
