@@ -406,6 +406,48 @@
     };
   }
 
+ const galleryGrid = document.getElementById('gallery-grid');
+let galleryFiltered = [];
+
+
+async function loadGallery() {
+    try {
+        const response = await fetch(`${API_BASE}/gallery`);
+        const data = await response.json();
+
+        galleryFiltered = data.gallery;
+
+        renderGallery();
+
+    } catch (error) {
+        console.error("Gallery loading error:", error);
+    }
+}
+
+
+function renderGallery() {
+
+    if (!galleryGrid) return;
+
+    galleryGrid.innerHTML = galleryFiltered.map(item => {
+
+        return `
+        <div class="gallery-card">
+            <img 
+              src="http://localhost:5000${item.image}" 
+              alt="${item.title}"
+              class="w-full h-64 object-cover rounded-xl"
+            >
+
+            <h3>${item.title}</h3>
+
+            <p>${item.description || ''}</p>
+        </div>
+        `;
+
+    }).join('');
+}
+
   // ------------------------------------------------------------------------
   // PLACE ORDER FLOW
   // ------------------------------------------------------------------------
@@ -503,4 +545,5 @@
   // INIT
   // ------------------------------------------------------------------------
   renderAll();
+  loadGallery();
 })();
