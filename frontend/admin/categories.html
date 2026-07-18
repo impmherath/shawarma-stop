@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shawarma Stop Categories</title>
+
+<link rel="stylesheet" href="css/admin.css">
+
+</head>
+
+
+<body class="admin-shell" data-page="categories.html">
+
+
+<aside class="admin-sidebar">
+
+<div class="brand">
+<div class="brand-mark">S</div>
+<div class="brand-copy">
+<strong>Shawarma Stop</strong>
+<small>Admin Panel</small>
+</div>
+</div>
+
+<div class="sidebar-section">
+<div class="sidebar-label">Navigation</div>
+<nav class="admin-nav">
+<a href="dashboard.html" data-nav="dashboard.html"><span class="nav-dot"></span>Dashboard</a>
+<a href="products.html" data-nav="products.html"><span class="nav-dot"></span>Products</a>
+<a href="categories.html" data-nav="categories.html"><span class="nav-dot"></span>Categories</a>
+<a href="orders.html" data-nav="orders.html"><span class="nav-dot"></span>Orders</a>
+</nav>
+</div>
+
+<div class="sidebar-footer">
+<p class="sidebar-note">Keep menu groups organized for the storefront and admin reporting.</p>
+<button class="button btn-ghost logout-button" type="button" data-logout-button>Logout</button>
+</div>
+
+</aside>
+
+
+<main class="admin-main">
+
+<header class="admin-topbar">
+<div class="topbar-copy">
+<h2>Categories</h2>
+<p>Add and maintain menu categories without touching the backend.</p>
+</div>
+<div class="top-actions">
+<button class="button btn-outline logout-button" type="button" data-logout-button>Logout</button>
+</div>
+</header>
+
+<div class="page-content">
+
+<section class="page-header">
+<div>
+<h1>Categories Management</h1>
+<p>Manage the menu structure used by products and reports.</p>
+</div>
+<button class="button btn-primary" type="button" id="addCategoryButton">+ Add Category</button>
+</section>
+
+<section class="table-card">
+<div class="section-head">
+<div>
+<h2>All Categories</h2>
+<p>Each category shows the current product count.</p>
+</div>
+<span class="chip" id="categoriesCount">0 categories</span>
+</div>
+
+<div class="page-message info" id="categoriesMessage" hidden></div>
+
+<div class="table-scroll">
+<table class="data-table">
+<thead>
+<tr>
+<th>Name</th>
+<th>Products</th>
+<th>Created</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody id="categoriesTable"></tbody>
+</table>
+</div>
+</section>
+
+</div>
+
+</main>
+
+
+<div class="modal" id="categoryModal" aria-hidden="true">
+<div class="modal-backdrop" data-close-modal></div>
+<div class="modal-content small" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
+<div class="modal-header">
+<div>
+<h3 id="categoryModalTitle">Add Category</h3>
+<p class="modal-description">Create a category name that will be assigned to products.</p>
+</div>
+<button class="button btn-outline btn-small" type="button" data-close-modal>Close</button>
+</div>
+<div class="modal-body">
+<form id="categoryForm" class="stack">
+<input type="hidden" id="categoryId">
+
+<div class="field">
+<label for="categoryName">Category Name</label>
+<input class="input" type="text" id="categoryName" required maxlength="100" placeholder="e.g. Shawarma">
+</div>
+
+<div class="page-message info" id="categoryFormMessage" hidden></div>
+
+<div class="form-actions">
+<button class="button btn-outline" type="button" data-close-modal>Cancel</button>
+<button class="button btn-primary" type="submit" id="saveCategoryButton">Save Category</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+
+
+<script src="js/common.js"></script>
+<script src="js/categories.js"></script>
+
+</body>
+
+</html>

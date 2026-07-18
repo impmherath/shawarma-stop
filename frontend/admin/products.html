@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shawarma Stop Products</title>
+
+<link rel="stylesheet" href="css/admin.css">
+
+</head>
+
+
+<body class="admin-shell" data-page="products.html">
+
+
+<aside class="admin-sidebar">
+
+<div class="brand">
+<div class="brand-mark">S</div>
+<div class="brand-copy">
+<strong>Shawarma Stop</strong>
+<small>Admin Panel</small>
+</div>
+</div>
+
+<div class="sidebar-section">
+<div class="sidebar-label">Navigation</div>
+<nav class="admin-nav">
+<a href="dashboard.html" data-nav="dashboard.html"><span class="nav-dot"></span>Dashboard</a>
+<a href="products.html" data-nav="products.html"><span class="nav-dot"></span>Products</a>
+<a href="categories.html" data-nav="categories.html"><span class="nav-dot"></span>Categories</a>
+<a href="orders.html" data-nav="orders.html"><span class="nav-dot"></span>Orders</a>
+</nav>
+</div>
+
+<div class="sidebar-footer">
+<p class="sidebar-note">Maintain product names, prices, categories, and availability from one screen.</p>
+<button class="button btn-ghost logout-button" type="button" data-logout-button>Logout</button>
+</div>
+
+</aside>
+
+
+<main class="admin-main">
+
+<header class="admin-topbar">
+<div class="topbar-copy">
+<h2>Products</h2>
+<p>Create, edit, search, and manage product availability.</p>
+</div>
+<div class="top-actions">
+<button class="button btn-outline logout-button" type="button" data-logout-button>Logout</button>
+</div>
+</header>
+
+<div class="page-content">
+
+<section class="page-header">
+<div>
+<h1>Products Management</h1>
+<p>Display all products, search the catalog, update details, upload images, and toggle availability without leaving the admin panel.</p>
+</div>
+<button class="button btn-primary" type="button" id="addProductButton">+ Add Product</button>
+</section>
+
+<section class="table-card">
+<div class="toolbar">
+<form id="productFilters" class="toolbar-actions" autocomplete="off">
+<input class="input search" type="search" id="productSearch" placeholder="Search products by name or description">
+<select class="select" id="availabilityFilter">
+<option value="">All availability</option>
+<option value="available">Available</option>
+<option value="unavailable">Unavailable</option>
+</select>
+<button class="button btn-outline" type="submit">Search</button>
+<button class="button btn-secondary" type="button" id="resetProducts">Reset</button>
+</form>
+<div class="inline-actions">
+<span class="chip" id="productsCount">0 products</span>
+</div>
+</div>
+
+<div class="page-message info" id="productsMessage" hidden></div>
+
+<div class="table-scroll">
+<table class="data-table">
+<thead>
+<tr>
+<th>Image</th>
+<th>Product</th>
+<th>Category</th>
+<th>Price</th>
+<th>Availability</th>
+<th>Created</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody id="productsTable"></tbody>
+</table>
+</div>
+</section>
+
+</div>
+
+</main>
+
+
+<div class="modal" id="productModal" aria-hidden="true">
+<div class="modal-backdrop" data-close-modal></div>
+<div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
+<div class="modal-header">
+<div>
+<h3 id="productModalTitle">Add Product</h3>
+<p class="modal-description">Fill in the product details and optionally upload an image.</p>
+</div>
+<button class="button btn-outline btn-small" type="button" data-close-modal>Close</button>
+</div>
+<div class="modal-body">
+<form id="productForm" class="stack" enctype="multipart/form-data">
+<input type="hidden" id="productId">
+
+<div class="modal-grid">
+<div class="field">
+<label for="productName">Product Name</label>
+<input class="input" type="text" id="productName" required maxlength="150">
+</div>
+
+<div class="field">
+<label for="productPrice">Price</label>
+<input class="input" type="number" id="productPrice" min="0" step="0.01" required>
+</div>
+</div>
+
+<div class="field">
+<label for="productDescription">Description</label>
+<textarea class="textarea" id="productDescription" placeholder="Short product description"></textarea>
+</div>
+
+<div class="modal-grid">
+<div class="field">
+<label for="productCategory">Category</label>
+<select class="select" id="productCategory" required></select>
+</div>
+
+<div class="field">
+<label>Availability</label>
+<label class="switch">
+<input type="checkbox" id="productAvailability" checked>
+<span class="switch-track"></span>
+<span class="muted">Mark as available in the storefront</span>
+</label>
+</div>
+</div>
+
+<div class="image-input-wrap">
+<div class="field">
+<label for="productImage">Product Image</label>
+<input class="file-input" type="file" id="productImage" accept="image/jpeg,image/png,image/webp">
+</div>
+<div class="preview-box">
+<img class="preview-image" id="productImagePreview" alt="Product preview" hidden>
+<p class="helper-text">Accepted formats: JPG, PNG, WEBP. Images are resized automatically by the backend.</p>
+</div>
+</div>
+
+<div class="page-message info" id="productFormMessage" hidden></div>
+
+<div class="form-actions">
+<button class="button btn-outline" type="button" data-close-modal>Cancel</button>
+<button class="button btn-primary" type="submit" id="saveProductButton">Save Product</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+
+
+<script src="js/common.js"></script>
+<script src="js/products.js"></script>
+
+</body>
+
+</html>

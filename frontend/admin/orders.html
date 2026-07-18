@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shawarma Stop Orders</title>
+
+<link rel="stylesheet" href="css/admin.css">
+
+</head>
+
+
+<body class="admin-shell" data-page="orders.html">
+
+
+<aside class="admin-sidebar">
+
+<div class="brand">
+<div class="brand-mark">S</div>
+<div class="brand-copy">
+<strong>Shawarma Stop</strong>
+<small>Admin Panel</small>
+</div>
+</div>
+
+<div class="sidebar-section">
+<div class="sidebar-label">Navigation</div>
+<nav class="admin-nav">
+<a href="dashboard.html" data-nav="dashboard.html"><span class="nav-dot"></span>Dashboard</a>
+<a href="products.html" data-nav="products.html"><span class="nav-dot"></span>Products</a>
+<a href="categories.html" data-nav="categories.html"><span class="nav-dot"></span>Categories</a>
+<a href="orders.html" data-nav="orders.html"><span class="nav-dot"></span>Orders</a>
+</nav>
+</div>
+
+<div class="sidebar-footer">
+<p class="sidebar-note">Review customer orders, update their status, and remove records when needed.</p>
+<button class="button btn-ghost logout-button" type="button" data-logout-button>Logout</button>
+</div>
+
+</aside>
+
+
+<main class="admin-main">
+
+<header class="admin-topbar">
+<div class="topbar-copy">
+<h2>Orders</h2>
+<p>Search customer orders, filter by status, and open detailed order records.</p>
+</div>
+<div class="top-actions">
+<button class="button btn-outline logout-button" type="button" data-logout-button>Logout</button>
+</div>
+</header>
+
+<div class="page-content">
+
+<section class="page-header">
+<div>
+<h1>Orders Management</h1>
+<p>Search by customer, filter by status, inspect order details, update the status, or delete orders with confirmation.</p>
+</div>
+</section>
+
+<section class="table-card">
+<div class="toolbar">
+<form id="ordersFilters" class="toolbar-actions" autocomplete="off">
+<input class="input search" type="search" id="orderSearch" placeholder="Search by customer name, phone, or address">
+<select class="select" id="statusFilter">
+<option value="">All statuses</option>
+<option value="Pending">Pending</option>
+<option value="Preparing">Preparing</option>
+<option value="Completed">Completed</option>
+<option value="Cancelled">Cancelled</option>
+</select>
+<button class="button btn-outline" type="submit">Search</button>
+<button class="button btn-secondary" type="button" id="resetOrders">Reset</button>
+</form>
+<span class="chip" id="ordersCount">0 orders</span>
+</div>
+
+<div class="page-message info" id="ordersMessage" hidden></div>
+
+<div class="table-scroll">
+<table class="data-table">
+<thead>
+<tr>
+<th>ID</th>
+<th>Customer</th>
+<th>Phone</th>
+<th>Total</th>
+<th>Status</th>
+<th>Created</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody id="ordersTable"></tbody>
+</table>
+</div>
+</section>
+
+</div>
+
+</main>
+
+
+<div class="modal" id="orderModal" aria-hidden="true">
+<div class="modal-backdrop" data-close-modal></div>
+<div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="orderModalTitle">
+<div class="modal-header">
+<div>
+<h3 id="orderModalTitle">Order Details</h3>
+<p class="modal-description">Inspect the order, update its state, or remove it from the database.</p>
+</div>
+<button class="button btn-outline btn-small" type="button" data-close-modal>Close</button>
+</div>
+<div class="modal-body">
+<div class="details-grid">
+<div class="details-card">
+<h4>Customer Info</h4>
+<ul class="detail-list" id="orderCustomerDetails"></ul>
+</div>
+
+<div class="details-card">
+<h4>Status</h4>
+<div class="stacked">
+<div class="field">
+<label for="orderStatus">Update Status</label>
+<select class="select" id="orderStatus"></select>
+</div>
+<div class="page-message info" id="orderFormMessage" hidden></div>
+<div class="form-actions">
+<button class="button btn-outline" type="button" data-close-modal>Close</button>
+<button class="button btn-danger" type="button" id="deleteOrderButton">Delete Order</button>
+<button class="button btn-primary" type="button" id="saveOrderButton">Save Status</button>
+</div>
+</div>
+</div>
+</div>
+
+<div class="details-card" style="margin-top: 16px;">
+<h4>Order Items</h4>
+<div class="order-items" id="orderItemsList"></div>
+</div>
+</div>
+</div>
+</div>
+
+
+<script src="js/common.js"></script>
+<script src="js/orders.js"></script>
+
+</body>
+
+</html>

@@ -5,50 +5,71 @@
 
 <title>Admin Login</title>
 
-<link rel="stylesheet" href="css/admin.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shawarma Stop Admin Login</title>
 
 </head>
 
 
 <body>
 
-
-<div class="login-container">
-
-
-<h2>
-Admin Login
-</h2>
+<body class="auth-page">
 
 
-<input 
-type="text"
-id="username"
-placeholder="Username"
->
+<main class="auth-shell">
 
 
-<input 
-type="password"
-id="password"
-placeholder="Password"
->
+<section class="auth-intro">
 
+<div class="auth-eyebrow">Shawarma Stop Admin</div>
 
-<button onclick="login()">
-Login
-</button>
+<h1>Manage the kitchen, inventory, and orders from one polished dashboard.</h1>
 
+<p>
+This admin workspace keeps products, categories, and orders in sync with the existing Node.js, Express, and MySQL backend while protecting access with JWT authentication.
+</p>
 
-<p id="message"></p>
-
-
+<div class="auth-highlights">
+<span>Secure HTTP-only JWT cookie</span>
+<span>Responsive admin UI</span>
+<span>Products, categories, and orders</span>
 </div>
 
+</section>
 
 
+<section class="auth-card">
+
+<h2>Admin Login</h2>
+<p class="subtle">Enter your admin credentials to access the management panel.</p>
+
+<form id="loginForm" class="auth-form">
+
+<div class="field">
+<label for="username">Username</label>
+<input class="input" type="text" id="username" placeholder="admin" autocomplete="username" required>
+</div>
+
+<div class="field">
+<label for="password">Password</label>
+<input class="input" type="password" id="password" placeholder="Your password" autocomplete="current-password" required>
+</div>
+
+<button class="button btn-primary" type="submit" id="loginButton">Login</button>
+
+</form>
+
+<p id="message" class="page-message info" hidden></p>
+
+</section>
+
+
+</main>
+
+
+<script src="js/common.js"></script>
 <script src="js/login.js"></script>
-
 
 </body>
 

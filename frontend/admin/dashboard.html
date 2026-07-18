@@ -3,59 +3,100 @@
 
 <head>
 
-<title>Admin Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shawarma Stop Admin Dashboard</title>
 
 <link rel="stylesheet" href="css/admin.css">
 
 </head>
 
 
-<body>
+<body class="admin-shell" data-page="dashboard.html">
 
 
-<div class="dashboard">
+<aside class="admin-sidebar">
 
-
-<h1>Admin Dashboard</h1>
-
-
-<div class="cards">
-
-
-<div class="card">
-<h3>Total Products</h3>
-<p id="totalProducts">0</p>
+<div class="brand">
+<div class="brand-mark">S</div>
+<div class="brand-copy">
+<strong>Shawarma Stop</strong>
+<small>Admin Panel</small>
+</div>
 </div>
 
-
-<div class="card">
-<h3>Total Categories</h3>
-<p id="totalCategories">0</p>
+<div class="sidebar-section">
+<div class="sidebar-label">Navigation</div>
+<nav class="admin-nav">
+<a href="dashboard.html" data-nav="dashboard.html"><span class="nav-dot"></span>Dashboard</a>
+<a href="products.html" data-nav="products.html"><span class="nav-dot"></span>Products</a>
+<a href="categories.html" data-nav="categories.html"><span class="nav-dot"></span>Categories</a>
+<a href="orders.html" data-nav="orders.html"><span class="nav-dot"></span>Orders</a>
+</nav>
 </div>
 
-
-<div class="card">
-<h3>Total Orders</h3>
-<p id="totalOrders">0</p>
+<div class="sidebar-footer">
+<p class="sidebar-note">JWT protected admin area with live dashboard metrics and order controls.</p>
+<button class="button btn-ghost logout-button" type="button" data-logout-button>Logout</button>
 </div>
 
+</aside>
 
-<div class="card">
-<h3>Today's Orders</h3>
-<p id="todaysOrders">0</p>
+
+<main class="admin-main">
+
+<header class="admin-topbar">
+<div class="topbar-copy">
+<h2>Dashboard</h2>
+<p>Monitor store performance and the most recent customer orders.</p>
 </div>
-
-
+<div class="top-actions">
+<button class="button btn-outline logout-button" type="button" data-logout-button>Logout</button>
 </div>
+</header>
 
+<div class="page-content">
 
+<section class="metric-grid" aria-label="Dashboard statistics">
+
+<article class="metric-card">
+<div class="label">Total Products</div>
+<div class="value" id="totalProducts">0</div>
+<div class="hint">Active menu items in the catalog.</div>
+</article>
+
+<article class="metric-card">
+<div class="label">Total Categories</div>
+<div class="value" id="totalCategories">0</div>
+<div class="hint">Organized menu sections.</div>
+</article>
+
+<article class="metric-card">
+<div class="label">Total Orders</div>
+<div class="value" id="totalOrders">0</div>
+<div class="hint">All recorded customer orders.</div>
+</article>
+
+<article class="metric-card">
+<div class="label">Today's Orders</div>
+<div class="value" id="todaysOrders">0</div>
+<div class="hint">Orders created today.</div>
+</article>
+
+</section>
+
+<section class="dashboard-grid">
+
+<article class="table-card">
+<div class="section-head">
+<div>
 <h2>Recent Orders</h2>
-
-
-<table>
-
+<p>Latest customer activity from the live database.</p>
+</div>
+</div>
+<div class="table-scroll">
+<table class="data-table">
 <thead>
-
 <tr>
 <th>ID</th>
 <th>Customer</th>
@@ -63,21 +104,30 @@
 <th>Total</th>
 <th>Date</th>
 </tr>
-
 </thead>
-
-
-<tbody id="ordersTable">
-
-</tbody>
-
-
+<tbody id="recentOrdersTable"></tbody>
 </table>
+</div>
+</article>
 
+<article class="summary-card">
+<div class="section-head">
+<div>
+<h2>Order Status Breakdown</h2>
+<p>Quick distribution of current order states.</p>
+</div>
+</div>
+<div class="stack" id="statusBreakdown"></div>
+</article>
+
+</section>
 
 </div>
 
+</main>
 
+
+<script src="js/common.js"></script>
 <script src="js/dashboard.js"></script>
 
 

@@ -298,6 +298,12 @@ const remove = asyncHandler(async(req,res)=>{
     }
 
 
+    if (rows[0].image) {
+        await deleteProductImages({
+            full: rows[0].image
+        });
+    }
+
     await db.query(
         "DELETE FROM products WHERE id=?",
         [id]

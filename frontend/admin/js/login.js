@@ -1,75 +1,39 @@
 
-console.log("login.js loaded");
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("loginForm");
+    const message = document.getElementById("message");
+    const button = document.getElementById("loginButton");
 
-const API_URL = "http://localhost:5000/api";
+    if (!form) {
+        return;
+    }
 
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
 
-async function login(){
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
 
-    console.log("LOGIN CLICKED");
+        AdminApp.setMessage(message, "Logging in...", "info");
+        button.disabled = true;
+        button.textContent = "Logging in...";
 
-    const username =
-    document.getElementById("username").value;
-
-
-    const password =
-    document.getElementById("password").value;
-
-
-    const message =
-    document.getElementById("message");
-
-
-    try{
-
-        const response = await fetch(
-            `${API_URL}/auth/login`,
-            {
-                method:"POST",
-
-                headers:{
-                    "Content-Type":"application/json"
-                },
-
-                credentials:"include",
-
-                body:JSON.stringify({
+        try {
+            await AdminApp.request("/auth/login", {
+                method: "POST",
+                body: {
                     username,
                     password
-                })
-            }
-        );
+                },
+                redirectOn401: false
+            });
 
-
-        const data = await response.json();
-
-
-        console.log(data);
-
-
-        if(response.ok){
-
-            window.location.href =
-            "dashboard.html";
-
+            window.location.href = "dashboard.html";
+        } catch (error) {
+            AdminApp.setMessage(message, error.message || "Backend connection error", "error");
+        } finally {
+            button.disabled = false;
+            button.textContent = "Login";
         }
-        else{
-
-            message.innerHTML =
-            data.error || "Login Failed";
-
-        }
-
-
-    }
-    catch(error){
-
-        console.log(error);
-
-        message.innerHTML =
-        "Backend connection error";
-
-    }
-
-}
-window.login = login;
+    });
+});

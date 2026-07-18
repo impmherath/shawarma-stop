@@ -1,19 +1,47 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const path = require("path");
 require("dotenv").config();
 
 const app = express();
 
+app.set("trust proxy", 1);
+
+const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5500,http://127.0.0.1:5500,http://localhost:5173,http://127.0.0.1:5173,http://localhost:5000,http://127.0.0.1:5000")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
 
 // Middleware
 app.use(cors({
-    origin: true,
+    origin(origin, callback) {
+        if (!origin) {
+            return callback(null, true);
+        }
+
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        return callback(new Error(`CORS blocked origin: ${origin}`));
+    },
     credentials: true
 }));
 
 app.use(express.json());
 app.use(cookieParser());
+
+app.get("/admin", (req, res) => {
+    res.redirect("/admin/login.html");
+});
+
+
+// Serve the admin frontend from the same origin so auth cookies are sent
+// back on dashboard and other protected API requests.
+app.use("/admin", express.static(path.join(__dirname, "../frontend/admin")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 // Database

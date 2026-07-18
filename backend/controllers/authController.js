@@ -11,15 +11,25 @@ const db = require('../config/db');
 const { COOKIE_NAME } = require('../middleware/auth');
 const asyncHandler = require('../middleware/asyncHandler');
 
-function cookieOptions() {
+function cookieOptions(req) {
   const isProd = process.env.NODE_ENV === 'production';
+  const isSecureRequest = Boolean(
+    req.secure || req.headers['x-forwarded-proto'] === 'https'
+  );
+  const secure = isProd || isSecureRequest;
+
   return {
     httpOnly: true,
-    secure: isProd, // requires HTTPS in production
-    sameSite: isProd ? 'strict' : 'lax',
+    secure,
+    sameSite: secure ? 'none' : 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     path: '/',
   };
+}
+
+function clearCookieOptions(req) {
+  const { maxAge, ...options } = cookieOptions(req);
+  return options;
 }
 
 const login = asyncHandler(async (req, res) => {
@@ -46,12 +56,12 @@ const user = rows[0];
     { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
   );
 
-  res.cookie(COOKIE_NAME, token, cookieOptions());
+  res.cookie(COOKIE_NAME, token, cookieOptions(req));
   res.json({ user: { id: user.id, username: user.username } });
 });
 
 const logout = asyncHandler(async (req, res) => {
-  res.clearCookie(COOKIE_NAME, { path: '/' });
+  res.clearCookie(COOKIE_NAME, clearCookieOptions(req));
   res.json({ success: true });
 });
 
