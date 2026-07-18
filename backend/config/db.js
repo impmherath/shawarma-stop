@@ -59,10 +59,14 @@ async function ensureOrderStatusSchema() {
 
     const currentType = statusColumns[0] && statusColumns[0].COLUMN_TYPE ? String(statusColumns[0].COLUMN_TYPE) : '';
 
-    if (!currentType.includes("Ready")) {
+    if (currentType.includes("Ready")) {
+        await db.query(
+            `UPDATE orders SET status = 'Preparing' WHERE status = 'Ready'`
+        );
+
         await db.query(
             `ALTER TABLE orders
-             MODIFY status ENUM('Pending','Preparing','Ready','Completed','Cancelled')
+             MODIFY status ENUM('Pending','Preparing','Completed','Cancelled')
              DEFAULT 'Pending'`
         );
     }

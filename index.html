@@ -126,7 +126,7 @@
 <!--<header id="site-header" class="sticky top-0 z-50 bg-green-500/95 backdrop-blur supports-[backdrop-filter]:bg-green-500/90 shadow-lg shadow-green-900/20"> -->
   <nav class="max-w-7xl mx-auto flex items-center justify-between px-4 lg:px-8 py-1" aria-label="Primary">
     <a href="#home" class="flex items-center gap-3">
-      <img src="images/SHAWARMA STOP BRANDING-02.jpg" alt="Shawarma Stop logo" class="h-14 w-auto rounded-md">
+      <img src="images/SHAWARMA STOP BRANDING-02.jpg" alt="Shawarma Stop logo" class="h-16 sm:h-14 w-auto rounded-md object-contain">
       <span class="hidden sm:block text-cream font-display font-bold text-lg leading-tight">Shawarma Stop</span>
     </a>
     <ul class="hidden lg:flex items-center gap-8 text-cream font-semibold text-sm">
@@ -148,24 +148,34 @@
       <a href="#menu" class="ripple-btn hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-brick to-brick-700 hover:from-brick-600 hover:to-brick-700 text-cream font-bold text-sm px-5 py-2.5 rounded-full shadow-md shadow-brick/30 transition">
         Order Now
       </a>
-      <button id="menu-toggle" aria-label="Open menu" aria-expanded="false" class="lg:hidden text-cream p-2 rounded-md hover:bg-green-600/50">
+      <button id="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu" class="lg:hidden text-cream p-2 rounded-md hover:bg-green-600/50">
         <svg id="icon-open" class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
         <svg id="icon-close" class="w-7 h-7 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
   </nav>
   <!-- Mobile menu -->
-  <div id="mobile-menu" class="lg:hidden hidden bg-green-600 border-t border-green-400/20">
-    <ul class="flex flex-col items-center px-6 py-4 gap-4 text-cream font-semibold text-center">
-    
-    <!--<ul class="flex flex-col px-6 py-4 gap-4 text-cream font-semibold"> -->
-      <li><a href="#home" class="block py-1">Home</a></li>
-      <li><a href="#about" class="block py-1">About Us</a></li>
-      <li><a href="#menu" class="block py-1">Our Menu</a></li>
-      <li><a href="#gallery" class="block py-1">Gallery</a></li>
-      <li><a href="#contact" class="block py-1">Contact Us</a></li>
-      <li><a href="#menu" class="inline-block bg-brick text-center rounded-full py-2.5 px-4 mt-1">Order Now</a></li>
-    </ul>
+  <div id="mobile-menu" class="lg:hidden fixed inset-0 z-40 hidden opacity-0 pointer-events-none transition-opacity duration-300" aria-hidden="true">
+    <div data-mobile-menu-backdrop class="absolute inset-0 bg-green-950/70 backdrop-blur-sm opacity-0 transition-opacity duration-300"></div>
+    <div data-mobile-menu-panel class="absolute right-0 top-0 h-full w-full max-w-sm translate-x-full bg-green-600 border-l border-green-400/20 shadow-2xl transition-transform duration-300 ease-out flex flex-col">
+      <div class="flex items-center justify-between px-6 py-5 border-b border-green-400/20">
+        <div>
+          <p class="text-xs uppercase tracking-[0.2em] text-gold/90 font-bold">Menu</p>
+          <p class="text-cream font-display font-bold text-lg mt-1">Shawarma Stop</p>
+        </div>
+        <button type="button" aria-label="Close menu" data-mobile-menu-close class="w-10 h-10 rounded-full bg-cream/10 hover:bg-cream/20 text-cream flex items-center justify-center transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <ul class="flex flex-col px-6 py-5 gap-3 text-cream font-semibold text-center">
+        <li><a href="#home" data-mobile-menu-item class="block py-2 rounded-xl hover:bg-green-500/60 transition">Home</a></li>
+        <li><a href="#about" data-mobile-menu-item class="block py-2 rounded-xl hover:bg-green-500/60 transition">About Us</a></li>
+        <li><a href="#menu" data-mobile-menu-item class="block py-2 rounded-xl hover:bg-green-500/60 transition">Our Menu</a></li>
+        <li><a href="#gallery" data-mobile-menu-item class="block py-2 rounded-xl hover:bg-green-500/60 transition">Gallery</a></li>
+        <li><a href="#contact" data-mobile-menu-item class="block py-2 rounded-xl hover:bg-green-500/60 transition">Contact Us</a></li>
+        <li><a href="#menu" data-mobile-menu-item class="inline-block bg-brick text-center rounded-full py-3 px-4 mt-2 shadow-md shadow-brick/30">Order Now</a></li>
+      </ul>
+    </div>
   </div>
 </header>
 
@@ -562,8 +572,10 @@
      Collects customer details + shows an editable order summary,
      then builds a WhatsApp message on "Place Order".
      ============================================================ -->
-<div id="checkout-modal" class="fixed inset-0 z-[90] bg-green-900/70 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Checkout">
-  <div class="co-panel w-full max-w-lg max-h-[90vh] overflow-y-auto bg-cream rounded-3xl shadow-2xl scale-95 opacity-0 translate-y-4 transition-all duration-300 ease-out">
+<!-- The modal starts near the top on small screens so tall forms stay reachable,
+     then re-centers on larger viewports for a more polished desktop experience. -->
+<div id="checkout-modal" class="fixed inset-0 z-[90] bg-green-900/70 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 flex items-start sm:items-center justify-center p-3 sm:p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-label="Checkout">
+  <div class="co-panel w-full max-w-[44rem] max-h-[calc(100dvh-1.5rem)] sm:max-h-[90vh] overflow-y-auto bg-cream rounded-2xl sm:rounded-3xl shadow-2xl scale-95 opacity-0 translate-y-4 transition-all duration-300 ease-out">
 
     <!-- Checkout form view -->
     <div id="checkout-view">
@@ -577,7 +589,7 @@
       <form id="checkout-form" class="px-6 sm:px-8 py-6" novalidate>
         <!-- Order summary (qty +/- also works here, same as the cart drawer) -->
         <h3 class="font-display font-bold text-sm uppercase tracking-wide text-brick mb-3">Order Summary</h3>
-        <div id="checkout-summary" class="space-y-3 mb-3 max-h-48 overflow-y-auto pr-1"></div>
+        <div id="checkout-summary" class="space-y-3 mb-3 max-h-40 sm:max-h-48 overflow-y-auto pr-0 sm:pr-1"></div>
         <div class="flex items-center justify-between font-display font-bold text-lg text-green-700 border-t border-green-100 pt-3 mb-6">
           <span>Grand Total</span>
           <span id="checkout-total">$0</span>
@@ -882,20 +894,66 @@ document.addEventListener('keydown', (e) => {
 // Mobile menu toggle
 const menuToggle = document.getElementById('menu-toggle');
 const mobileMenu = document.getElementById('mobile-menu');
+const mobileMenuBackdrop = mobileMenu.querySelector('[data-mobile-menu-backdrop]');
+const mobileMenuPanel = mobileMenu.querySelector('[data-mobile-menu-panel]');
+const mobileMenuCloseButtons = mobileMenu.querySelectorAll('[data-mobile-menu-close]');
 const iconOpen = document.getElementById('icon-open');
 const iconClose = document.getElementById('icon-close');
-menuToggle.addEventListener('click', () => {
-  const isOpen = !mobileMenu.classList.contains('hidden');
-  mobileMenu.classList.toggle('hidden');
-  iconOpen.classList.toggle('hidden');
-  iconClose.classList.toggle('hidden');
-  menuToggle.setAttribute('aria-expanded', String(!isOpen));
-});
-mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-  mobileMenu.classList.add('hidden');
+let mobileMenuCloseTimer = null;
+
+function openMobileMenu() {
+  if (mobileMenuCloseTimer) {
+    clearTimeout(mobileMenuCloseTimer);
+    mobileMenuCloseTimer = null;
+  }
+
+  mobileMenu.classList.remove('hidden');
+  requestAnimationFrame(() => {
+    mobileMenu.classList.remove('opacity-0', 'pointer-events-none');
+    mobileMenuBackdrop.classList.add('opacity-100');
+    mobileMenuPanel.classList.remove('translate-x-full');
+  });
+  iconOpen.classList.add('hidden');
+  iconClose.classList.remove('hidden');
+  menuToggle.setAttribute('aria-expanded', 'true');
+  mobileMenu.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMobileMenu() {
+  mobileMenu.classList.add('opacity-0', 'pointer-events-none');
+  mobileMenuBackdrop.classList.remove('opacity-100');
+  mobileMenuPanel.classList.add('translate-x-full');
   iconOpen.classList.remove('hidden');
   iconClose.classList.add('hidden');
-}));
+  menuToggle.setAttribute('aria-expanded', 'false');
+  mobileMenu.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+
+  mobileMenuCloseTimer = window.setTimeout(() => {
+    if (mobileMenu.classList.contains('opacity-0')) {
+      mobileMenu.classList.add('hidden');
+    }
+  }, 300);
+}
+
+menuToggle.addEventListener('click', () => {
+  const isOpen = menuToggle.getAttribute('aria-expanded') === 'true';
+  if (isOpen) closeMobileMenu();
+  else openMobileMenu();
+});
+
+mobileMenuBackdrop.addEventListener('click', closeMobileMenu);
+mobileMenuCloseButtons.forEach((button) => button.addEventListener('click', closeMobileMenu));
+mobileMenu.querySelectorAll('[data-mobile-menu-item]').forEach((link) => {
+  link.addEventListener('click', closeMobileMenu);
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && menuToggle.getAttribute('aria-expanded') === 'true') {
+    closeMobileMenu();
+  }
+});
 
 // Back to top
 const backToTop = document.getElementById('back-to-top');

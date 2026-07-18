@@ -5,7 +5,7 @@
     const apiBase = `${backendOrigin}/api`;
     const assetBase = backendOrigin;
 
-    const orderStatuses = ["Pending", "Preparing", "Ready", "Completed", "Cancelled"];
+    const orderStatuses = ["Pending", "Preparing", "Completed", "Cancelled"];
 
     function escapeHtml(value) {
         return String(value ?? "")

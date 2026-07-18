@@ -145,20 +145,21 @@
   }
 
   // Shared row markup used in BOTH the cart drawer and the checkout modal's
-  // order summary, so quantity controls behave identically in both places.
+  // order summary. It stacks on small screens so the same markup stays
+  // readable in the drawer, on mobile checkout, and on wider layouts.
   function cartRowTemplate(item) {
     return `
-    <div class="cart-row flex items-center gap-3 bg-white border border-green-100 rounded-2xl p-3" data-id="${item.id}">
+    <div class="cart-row flex flex-col gap-3 bg-white border border-green-100 rounded-2xl p-3 sm:flex-row sm:items-center" data-id="${item.id}">
       <div class="flex-1 min-w-0">
         <p class="font-display font-bold text-green-700 text-sm truncate">${item.name}</p>
         <p class="text-xs text-ink/50">${money(item.price)} each</p>
       </div>
-      <div class="flex items-center gap-2 shrink-0">
+      <div class="flex items-center gap-2 shrink-0 self-start sm:self-center">
         <button type="button" class="qty-decrease w-7 h-7 rounded-full bg-green-50 hover:bg-green-100 text-green-700 font-bold flex items-center justify-center transition" aria-label="Decrease quantity of ${item.name}">−</button>
         <span class="w-5 text-center text-sm font-semibold">${item.qty}</span>
         <button type="button" class="qty-increase w-7 h-7 rounded-full bg-green-50 hover:bg-green-100 text-green-700 font-bold flex items-center justify-center transition" aria-label="Increase quantity of ${item.name}">+</button>
       </div>
-      <div class="text-right w-20 shrink-0">
+      <div class="text-left sm:text-right w-full sm:w-20 shrink-0">
         <p class="text-sm font-bold text-brick">${money(item.price * item.qty)}</p>
         <button type="button" class="cart-remove text-[11px] text-ink/40 hover:text-brick transition" aria-label="Remove ${item.name} from cart">Remove</button>
       </div>

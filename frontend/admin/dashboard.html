@@ -82,6 +82,41 @@
 <div class="value" id="todaysOrders">0</div>
 <div class="hint">Orders created today.</div>
 </article>
+<article class="metric-card">
+<div class="label">Total Revenue</div>
+<div class="value" id="totalRevenue">LKR 0</div>
+<div class="hint">Gross revenue across all orders.</div>
+</article>
+
+<article class="metric-card">
+<div class="label">Today's Revenue</div>
+<div class="value" id="todaysRevenue">LKR 0</div>
+<div class="hint">Revenue recorded today.</div>
+</article>
+
+<article class="metric-card">
+<div class="label">Pending Orders</div>
+<div class="value" id="pendingOrders">0</div>
+<div class="hint">Orders waiting to be prepared.</div>
+</article>
+
+<article class="metric-card">
+<div class="label">Preparing Orders</div>
+<div class="value" id="preparingOrders">0</div>
+<div class="hint">Orders currently in the kitchen.</div>
+</article>
+
+<article class="metric-card">
+<div class="label">Completed Orders</div>
+<div class="value" id="completedOrders">0</div>
+<div class="hint">Orders successfully fulfilled.</div>
+</article>
+
+<article class="metric-card">
+<div class="label">Cancelled Orders</div>
+<div class="value" id="cancelledOrders">0</div>
+<div class="hint">Orders cancelled or voided.</div>
+</article>
 
 </section>
 
@@ -120,6 +155,38 @@
 <div class="stack" id="statusBreakdown"></div>
 </article>
 
+</section>
+
+<section class="analytics-grid" aria-label="Sales analytics">
+<article class="summary-card chart-card">
+<div class="section-head">
+<div>
+<h2>Daily Orders</h2>
+<p>Order volume over the last seven days.</p>
+</div>
+</div>
+<div class="mini-chart" id="dailyOrdersChart"></div>
+</article>
+
+<article class="summary-card chart-card">
+<div class="section-head">
+<div>
+<h2>Weekly Sales</h2>
+<p>Revenue grouped by week.</p>
+</div>
+</div>
+<div class="mini-chart" id="weeklySalesChart"></div>
+</article>
+
+<article class="summary-card chart-card">
+<div class="section-head">
+<div>
+<h2>Monthly Revenue</h2>
+<p>Revenue trend across the last year.</p>
+</div>
+</div>
+<div class="mini-chart" id="monthlyRevenueChart"></div>
+</article>
 </section>
 
 </div>

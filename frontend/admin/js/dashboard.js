@@ -22,6 +22,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function loadDashboard() {
     const recentOrdersTable = document.getElementById("recentOrdersTable");
     const statusBreakdown = document.getElementById("statusBreakdown");
+    const dailyOrdersChart = document.getElementById("dailyOrdersChart");
+    const weeklySalesChart = document.getElementById("weeklySalesChart");
+    const monthlyRevenueChart = document.getElementById("monthlyRevenueChart");
 
     if (recentOrdersTable) {
         recentOrdersTable.innerHTML = `<tr><td colspan="5"><div class="loading-state"><div class="spinner"></div><p>Loading recent orders</p></div></td></tr>`;
@@ -40,6 +43,12 @@ async function loadDashboard() {
         document.getElementById("totalCategories").textContent = data.totalCategories ?? 0;
         document.getElementById("totalOrders").textContent = data.totalOrders ?? 0;
         document.getElementById("todaysOrders").textContent = data.todaysOrders ?? 0;
+        document.getElementById("totalRevenue").textContent = AdminApp.formatCurrency(data.totalRevenue ?? 0);
+        document.getElementById("todaysRevenue").textContent = AdminApp.formatCurrency(data.todaysRevenue ?? 0);
+        document.getElementById("pendingOrders").textContent = data.pendingOrders ?? 0;
+        document.getElementById("preparingOrders").textContent = data.preparingOrders ?? 0;
+        document.getElementById("completedOrders").textContent = data.completedOrders ?? 0;
+        document.getElementById("cancelledOrders").textContent = data.cancelledOrders ?? 0;
 
         const recentOrders = Array.isArray(data.recentOrders) ? data.recentOrders : [];
 
@@ -79,6 +88,10 @@ async function loadDashboard() {
                 </div>
             `).join("");
         }
+
+        renderChart(dailyOrdersChart, data.dailyOrders || [], "value", "label", false);
+        renderChart(weeklySalesChart, data.weeklySales || [], "value", "label", true);
+        renderChart(monthlyRevenueChart, data.monthlyRevenue || [], "value", "label", true);
     } catch (error) {
         console.error(error);
         if (recentOrdersTable) {
@@ -86,4 +99,51 @@ async function loadDashboard() {
             AdminApp.setEmptyState(recentOrdersTable, "Unable to load dashboard data", error.message || "Please try again.");
         }
     }
+}
+
+function renderChart(container, rows, valueKey, labelKey, useCurrency) {
+    if (!container) {
+        return;
+    }
+
+    const data = Array.isArray(rows) ? rows : [];
+
+    if (!data.length) {
+        AdminApp.setEmptyState(container, "No chart data yet", "This view will fill automatically once new orders arrive.");
+        return;
+    }
+
+    const max = Math.max(...data.map((row) => Number(row[valueKey] ?? 0)), 1);
+
+    container.innerHTML = data.map((row) => {
+        const value = Number(row[valueKey] ?? 0);
+        const label = formatChartLabel(row[labelKey]);
+        const height = Math.max((value / max) * 100, 8);
+
+        return `
+            <div class="mini-chart-item">
+                <div class="mini-chart-bar-wrap">
+                    <div class="mini-chart-bar" style="height:${height}%"></div>
+                </div>
+                <div class="mini-chart-label">${AdminApp.escapeHtml(label)}</div>
+                <div class="mini-chart-value">${useCurrency ? AdminApp.formatCurrency(value) : value}</div>
+            </div>
+        `;
+    }).join("");
+}
+
+function formatChartLabel(value) {
+    if (!value) {
+        return "-";
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+        return String(value);
+    }
+
+    return new Intl.DateTimeFormat("en-LK", {
+        month: "short",
+        day: "numeric"
+    }).format(date);
 }

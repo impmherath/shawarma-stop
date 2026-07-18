@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         table: document.getElementById("ordersTable"),
         filters: document.getElementById("ordersFilters"),
         search: document.getElementById("orderSearch"),
+        date: document.getElementById("orderDate"),
         statusFilter: document.getElementById("statusFilter"),
         resetButton: document.getElementById("resetOrders"),
         modal: document.getElementById("orderModal"),
@@ -37,6 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         elements.resetButton.addEventListener("click", async () => {
             elements.search.value = "";
+            elements.date.value = "";
             elements.statusFilter.value = "";
             await loadOrders();
         });
@@ -59,6 +61,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         if (elements.statusFilter.value) {
             params.set("status", elements.statusFilter.value);
+        }
+        if (elements.date && elements.date.value) {
+            params.set("date", elements.date.value);
         }
 
         try {

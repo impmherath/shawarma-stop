@@ -158,6 +158,17 @@ const remove = asyncHandler(async (req, res) => {
         });
     }
 
+    const [products] = await db.query(
+        "SELECT COUNT(*) AS count FROM products WHERE category_id = ?",
+        [id]
+    );
+
+    if (products[0].count > 0) {
+        return res.status(409).json({
+            error: "Cannot delete a category that still has products"
+        });
+    }
+
 
     await db.query(
         "DELETE FROM categories WHERE id = ?",

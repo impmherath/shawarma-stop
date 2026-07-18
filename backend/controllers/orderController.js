@@ -30,7 +30,7 @@ function serializeOrder(order, items) {
 // GET ALL ORDERS
 const list = asyncHandler(async(req,res)=>{
 
-    const {search,status}=req.query;
+    const {search,status,date}=req.query;
 
 
     let sql = `
@@ -46,10 +46,11 @@ const list = asyncHandler(async(req,res)=>{
     if(search){
 
         conditions.push(
-            `(customer_name LIKE ? OR phone LIKE ? OR address LIKE ?)`
+            `(CAST(id AS CHAR) LIKE ? OR customer_name LIKE ? OR phone LIKE ? OR address LIKE ?)`
         );
 
         params.push(
+            `%${search}%`,
             `%${search}%`,
             `%${search}%`,
             `%${search}%`
@@ -65,6 +66,14 @@ const list = asyncHandler(async(req,res)=>{
         );
 
         params.push(status);
+
+    }
+
+    if(date){
+
+        conditions.push("DATE(created_at)=?");
+
+        params.push(date);
 
     }
 
@@ -259,7 +268,13 @@ const createPublic = asyncHandler(async(req,res)=>{
     }
 
 
-    const total = items.reduce(
+    const normalizedItems = items.map((item) => ({
+        productId: Number(item.productId),
+        quantity: Number(item.quantity),
+        unitPrice: Number(item.unitPrice)
+    }));
+
+    const total = normalizedItems.reduce(
         (sum,item)=>
         sum + item.quantity * item.unitPrice,
         0
@@ -291,9 +306,9 @@ const createPublic = asyncHandler(async(req,res)=>{
             ]
         );
 
-        for(const item of items){
+        for(const item of normalizedItems){
 
-            if (!item.productId || !item.quantity || item.unitPrice === undefined) {
+            if (!Number.isInteger(item.productId) || item.productId < 1 || !Number.isInteger(item.quantity) || item.quantity < 1 || !Number.isFinite(item.unitPrice) || item.unitPrice <= 0) {
                 throw new Error('Invalid order item payload');
             }
 

@@ -14,7 +14,7 @@ router.get('/:id', productController.getOne);
 router.use(requireAuth);
 
 router.post('/', upload.single('image'), productRules, validate, productController.create);
-router.put('/:id', upload.single('image'), productController.update);
+router.put('/:id', upload.single('image'), productRules, validate, productController.update);
 router.delete('/:id', productController.remove);
 
 module.exports = router;

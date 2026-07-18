@@ -96,11 +96,13 @@ const deleteProductImages = async ({
 
         if (!file) return;
 
+        const normalizedPath = file.replace(/^\/+/, "");
+
 
         const filePath = path.join(
             __dirname,
             "..",
-            file
+            normalizedPath
         );
 
 

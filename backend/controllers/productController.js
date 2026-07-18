@@ -170,7 +170,7 @@ const create = asyncHandler(async(req,res)=>{
             Number(price),
             image,
             categoryId || null,
-            isAvailable === "false" ? 0 : 1
+            isAvailable === undefined ? 1 : (String(isAvailable) === "false" ? 0 : 1)
         ]
     );
 
@@ -267,7 +267,7 @@ const update = asyncHandler(async(req,res)=>{
             price ?? existing.price,
             image,
             categoryId ?? existing.category_id,
-            isAvailable === "false" ? 0 : 1,
+            isAvailable === undefined ? existing.availability : (String(isAvailable) === "false" ? 0 : 1),
             id
         ]
     );
