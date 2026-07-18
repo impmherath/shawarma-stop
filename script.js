@@ -26,6 +26,9 @@
   // Format: country code + number, digits only, no "+", no spaces.
   const WHATSAPP_NUMBER = '94770701418';
   const CURRENCY = '$';
+  const backendHost = window.location.hostname || '127.0.0.1';
+  const backendProtocol = window.location.protocol === 'file:' ? 'http:' : window.location.protocol;
+  const API_BASE = `${backendProtocol}//${backendHost}:5000/api`;
 
   // ------------------------------------------------------------------------
   // CART STATE
@@ -119,6 +122,7 @@
   const placeOrderBtn = document.getElementById('checkout-place-order');
   const btnIdle = document.getElementById('checkout-btn-idle');
   const btnLoading = document.getElementById('checkout-btn-loading');
+  const checkoutError = document.getElementById('checkout-error');
 
   const nameInput = document.getElementById('co-name');
   const phoneInput = document.getElementById('co-phone');
@@ -269,6 +273,10 @@
     checkoutSuccess.classList.remove('flex');
     setLoading(false);
     clearFieldErrors();
+    if (checkoutError) {
+      checkoutError.textContent = '';
+      checkoutError.classList.add('hidden');
+    }
   }
 
   cartCheckoutBtn.addEventListener('click', openCheckoutModal);
@@ -382,6 +390,21 @@
     ].join('\n');
   }
 
+  function buildOrderPayload() {
+    return {
+      customerName: nameInput.value.trim(),
+      phone: normalizePhone(phoneInput.value.trim()),
+      address: addressInput.value.trim(),
+      note: notesInput.value.trim(),
+      items: getItems().map((item) => ({
+        productId: item.id,
+        productName: item.name,
+        quantity: item.qty,
+        unitPrice: item.price,
+      })),
+    };
+  }
+
   // ------------------------------------------------------------------------
   // PLACE ORDER FLOW
   // ------------------------------------------------------------------------
@@ -403,26 +426,59 @@
     if (!validateForm()) return;
 
     setLoading(true);
+    if (checkoutError) {
+      checkoutError.textContent = '';
+      checkoutError.classList.add('hidden');
+    }
 
-    // Small delay so the loading state is actually visible — this also
-    // gives the message-building "work" a perceptible moment, even though
-    // it's fast, so the UX doesn't feel like a jump-cut.
-    setTimeout(() => {
-      const message = buildWhatsAppMessage();
-      const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    const payload = buildOrderPayload();
 
-      setLoading(false);
-      showSuccess();
+    fetch(`${API_BASE}/orders/public`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          const error = new Error(data.message || data.error || 'Unable to save your order');
+          error.status = response.status;
+          throw error;
+        }
+        return data;
+      })
+      .then((data) => {
+        localStorage.setItem('shawarma:lastOrderAt', String(Date.now()));
+        if (data.orderId) {
+          localStorage.setItem('shawarma:lastOrderId', String(data.orderId));
+        }
 
-      setTimeout(() => {
-        window.open(url, '_blank');
+        const message = buildWhatsAppMessage();
+        const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 
-        // Order handed off to WhatsApp — reset everything for next time.
-        clearCart();
-        closeCheckoutModal();
-        checkoutForm.reset();
-      }, 900);
-    }, 700);
+        setLoading(false);
+        showSuccess();
+
+        setTimeout(() => {
+          window.open(url, '_blank');
+
+          // Order saved to the database and sent to WhatsApp — reset for the next order.
+          clearCart();
+          closeCheckoutModal();
+          checkoutForm.reset();
+        }, 900);
+      })
+      .catch((error) => {
+        setLoading(false);
+        if (checkoutError) {
+          checkoutError.textContent = error.message || 'Unable to place order';
+          checkoutError.classList.remove('hidden');
+        } else {
+          alert(error.message || 'Unable to place order');
+        }
+      });
   });
 
   // ------------------------------------------------------------------------

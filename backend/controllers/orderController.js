@@ -9,19 +9,19 @@ function serializeOrder(order, items) {
         customerName: order.customer_name,
         phone: order.phone,
         address: order.address,
-        note: order.note,
+        note: order.note || '',
         status: order.status,
-        total: order.total,
-        source: order.source,
+        total: order.total_amount ?? order.total,
+        source: order.source || 'Website',
         createdAt: order.created_at,
 
         items: items.map(item => ({
-    productId: item.product_id,
-    productName: item.product_name,
-    quantity: item.quantity,
-    unitPrice: item.price,
-    subtotal: item.quantity * item.price
-}))
+            productId: item.product_id,
+            productName: item.product_name,
+            quantity: item.quantity,
+            unitPrice: item.price,
+            subtotal: item.quantity * item.price
+        }))
     };
 
 }
@@ -177,6 +177,19 @@ const updateStatus = asyncHandler(async(req,res)=>{
     const {status}=req.body;
 
 
+    const [existing] = await db.query(
+        "SELECT id FROM orders WHERE id=?",
+        [req.params.id]
+    );
+
+
+    if (!existing.length) {
+        return res.status(404).json({
+            message: "Order not found"
+        });
+    }
+
+
     await db.query(
         "UPDATE orders SET status=? WHERE id=?",
         [
@@ -261,35 +274,40 @@ const createPublic = asyncHandler(async(req,res)=>{
         await connection.beginTransaction();
 
 
-    await connection.query(
-    `
-    INSERT INTO order_items
-    (order_id,product_id,quantity,price)
-    VALUES(?,?,?,?)
-    `,
-    [
-        order.insertId,
-        item.productId,
-        item.quantity,
-        item.unitPrice
-    ]
-);
-
+        const [orderResult] = await connection.query(
+            `
+            INSERT INTO orders
+            (customer_name, phone, address, note, source, total_amount, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            `,
+            [
+                customerName.trim(),
+                phone.trim(),
+                address.trim(),
+                note.trim(),
+                'Website',
+                total,
+                'Pending'
+            ]
+        );
 
         for(const item of items){
+
+            if (!item.productId || !item.quantity || item.unitPrice === undefined) {
+                throw new Error('Invalid order item payload');
+            }
 
             await connection.query(
                 `
                 INSERT INTO order_items
-                (order_id,product_name,quantity,unit_price,subtotal)
-                VALUES(?,?,?,?,?)
+                (order_id, product_id, quantity, price)
+                VALUES (?, ?, ?, ?)
                 `,
                 [
-                    order.insertId,
-                    item.name,
+                    orderResult.insertId,
+                    item.productId,
                     item.quantity,
                     item.unitPrice,
-                    item.quantity*item.unitPrice
                 ]
             );
 
@@ -301,7 +319,9 @@ const createPublic = asyncHandler(async(req,res)=>{
 
         res.status(201).json({
             success:true,
-            orderId:order.insertId
+            orderId:orderResult.insertId,
+            total,
+            message: 'Order placed successfully'
         });
 
 

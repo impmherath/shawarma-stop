@@ -93,6 +93,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                     </div>
                 </td>
                 <td>${AdminApp.escapeHtml(order.phone || "-")}</td>
+                <td>
+                    <div class="stacked">
+                        ${(order.items || []).slice(0, 3).map((item) => `<span class="chip">${AdminApp.escapeHtml(item.productName || "Item")} × ${AdminApp.escapeHtml(item.quantity)}</span>`).join("") || '<span class="muted">No items</span>'}
+                    </div>
+                </td>
                 <td class="strong">${AdminApp.formatCurrency(order.total)}</td>
                 <td>${AdminApp.statusBadge(order.status)}</td>
                 <td>${AdminApp.formatDateTime(order.createdAt)}</td>

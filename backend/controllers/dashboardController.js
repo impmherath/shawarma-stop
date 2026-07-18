@@ -31,7 +31,7 @@ const stats = asyncHandler(async (req, res) => {
   );
 
   const [recentOrders] = await db.query(
-    `SELECT id, customer_name, status, total_amount, created_at 
+    `SELECT id, customer_name, phone, status, total_amount, created_at 
      FROM orders 
      ORDER BY created_at DESC 
      LIMIT 5`

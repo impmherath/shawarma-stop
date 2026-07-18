@@ -5,7 +5,7 @@
     const apiBase = `${backendOrigin}/api`;
     const assetBase = backendOrigin;
 
-    const orderStatuses = ["Pending", "Preparing", "Completed", "Cancelled"];
+    const orderStatuses = ["Pending", "Preparing", "Ready", "Completed", "Cancelled"];
 
     function escapeHtml(value) {
         return String(value ?? "")
@@ -72,6 +72,8 @@
         switch ((status || "").toLowerCase()) {
             case "completed":
                 return "success";
+            case "ready":
+                return "warning";
             case "preparing":
                 return "warning";
             case "cancelled":

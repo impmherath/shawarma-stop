@@ -11,10 +11,68 @@ const db = mysql.createPool({
     queueLimit: 0
 });
 
+async function ensureOrderStatusSchema() {
+    const [noteColumns] = await db.query(
+        `
+        SELECT COUNT(*) AS count
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'orders'
+          AND COLUMN_NAME = 'note'
+        `
+    );
+
+    if (!noteColumns[0].count) {
+        await db.query(
+            `ALTER TABLE orders
+             ADD COLUMN note TEXT NULL AFTER address`
+        );
+    }
+
+    const [sourceColumns] = await db.query(
+        `
+        SELECT COUNT(*) AS count
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'orders'
+          AND COLUMN_NAME = 'source'
+        `
+    );
+
+    if (!sourceColumns[0].count) {
+        await db.query(
+            `ALTER TABLE orders
+             ADD COLUMN source VARCHAR(20) NOT NULL DEFAULT 'Website' AFTER note`
+        );
+    }
+
+    const [statusColumns] = await db.query(
+        `
+        SELECT COLUMN_TYPE
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'orders'
+          AND COLUMN_NAME = 'status'
+        LIMIT 1
+        `
+    );
+
+    const currentType = statusColumns[0] && statusColumns[0].COLUMN_TYPE ? String(statusColumns[0].COLUMN_TYPE) : '';
+
+    if (!currentType.includes("Ready")) {
+        await db.query(
+            `ALTER TABLE orders
+             MODIFY status ENUM('Pending','Preparing','Ready','Completed','Cancelled')
+             DEFAULT 'Pending'`
+        );
+    }
+}
+
 db.getConnection()
     .then(connection => {
         console.log("MySQL Connected");
         connection.release();
+        return ensureOrderStatusSchema();
     })
     .catch(err => {
         console.log("Database connection failed");

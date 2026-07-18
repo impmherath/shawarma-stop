@@ -5,9 +5,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         AdminApp.setActiveNav("dashboard.html");
         await loadDashboard();
 
+        window.addEventListener("storage", (event) => {
+            if (event.key === "shawarma:lastOrderAt") {
+                loadDashboard().catch((error) => console.error(error));
+            }
+        });
+
         setInterval(() => {
             loadDashboard().catch((error) => console.error(error));
-        }, 60000);
+        }, 15000);
     } catch (error) {
         console.error(error);
     }

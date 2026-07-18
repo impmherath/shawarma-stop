@@ -77,11 +77,16 @@ phone VARCHAR(20),
 
 address TEXT,
 
+note TEXT,
+
+source VARCHAR(20) DEFAULT 'Website',
+
 total_amount DECIMAL(10,2),
 
 status ENUM(
 'Pending',
 'Preparing',
+'Ready',
 'Completed',
 'Cancelled'
 )

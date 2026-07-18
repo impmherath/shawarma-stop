@@ -77,6 +77,7 @@ const orderStatusRules = [
         .isIn([
             "Pending",
             "Preparing",
+            "Ready",
             "Completed",
             "Cancelled"
         ])
