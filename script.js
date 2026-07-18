@@ -25,7 +25,7 @@
   // TODO: replace with your real WhatsApp Business number.
   // Format: country code + number, digits only, no "+", no spaces.
   const WHATSAPP_NUMBER = '94770701418';
-  const CURRENCY = '$';
+  const CURRENCY = 'Rs.';
   const backendHost = window.location.hostname || '127.0.0.1';
   const backendProtocol = window.location.protocol === 'file:' ? 'http:' : window.location.protocol;
   const API_BASE = `${backendProtocol}//${backendHost}:5000/api`;

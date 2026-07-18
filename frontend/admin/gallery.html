@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shawarma Stop Gallery</title>
+
+<link rel="stylesheet" href="css/admin.css">
+
+</head>
+
+
+<body class="admin-shell" data-page="gallery.html">
+
+
+<aside class="admin-sidebar">
+
+<div class="brand">
+<div class="brand-mark">S</div>
+<div class="brand-copy">
+<strong>Shawarma Stop</strong>
+<small>Admin Panel</small>
+</div>
+</div>
+
+<div class="sidebar-section">
+<div class="sidebar-label">Navigation</div>
+<nav class="admin-nav">
+<a href="dashboard.html" data-nav="dashboard.html"><span class="nav-dot"></span>Dashboard</a>
+<a href="products.html" data-nav="products.html"><span class="nav-dot"></span>Products</a>
+<a href="gallery.html" data-nav="gallery.html"><span class="nav-dot"></span>Gallery</a>
+<a href="media.html" data-nav="media.html"><span class="nav-dot"></span>Media Library</a>
+<a href="categories.html" data-nav="categories.html"><span class="nav-dot"></span>Categories</a>
+<a href="orders.html" data-nav="orders.html"><span class="nav-dot"></span>Orders</a>
+</nav>
+</div>
+
+<div class="sidebar-footer">
+<p class="sidebar-note">Manage gallery imagery, titles, visibility, and order from one place.</p>
+<button class="button btn-ghost logout-button" type="button" data-logout-button>Logout</button>
+</div>
+
+</aside>
+
+
+<main class="admin-main">
+
+<header class="admin-topbar">
+<div class="topbar-copy">
+<h2>Gallery</h2>
+<p>Upload, reorder, hide, and update gallery photos from the dashboard.</p>
+</div>
+<div class="top-actions">
+<button class="button btn-outline logout-button" type="button" data-logout-button>Logout</button>
+</div>
+</header>
+
+<div class="page-content">
+
+<section class="page-header">
+<div>
+<h1>Gallery Management</h1>
+<p>Reorder images with drag and drop, update titles and descriptions, and control which images are visible on the customer site.</p>
+</div>
+<button class="button btn-primary" type="button" id="addGalleryButton">+ Add Gallery Image</button>
+</section>
+
+<section class="table-card">
+<div class="toolbar">
+<form id="galleryFilters" class="toolbar-actions" autocomplete="off">
+<input class="input search" type="search" id="gallerySearch" placeholder="Search gallery title or description">
+<select class="select" id="galleryStatusFilter">
+<option value="">All statuses</option>
+<option value="Visible">Visible</option>
+<option value="Hidden">Hidden</option>
+</select>
+<button class="button btn-outline" type="submit">Search</button>
+<button class="button btn-secondary" type="button" id="resetGallery">Reset</button>
+</form>
+<span class="chip" id="galleryCount">0 images</span>
+</div>
+
+<div class="page-message info" id="galleryMessage" hidden></div>
+<div id="galleryGrid" class="gallery-grid"></div>
+</section>
+
+</div>
+
+</main>
+
+
+<div class="modal" id="galleryModal" aria-hidden="true">
+<div class="modal-backdrop" data-close-modal></div>
+<div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="galleryModalTitle">
+<div class="modal-header">
+<div>
+<h3 id="galleryModalTitle">Add Gallery Image</h3>
+<p class="modal-description">Upload a gallery photo, add copy, and choose its display order and visibility.</p>
+</div>
+<button class="button btn-outline btn-small" type="button" data-close-modal>Close</button>
+</div>
+<div class="modal-body">
+<form id="galleryForm" class="stack" enctype="multipart/form-data">
+<input type="hidden" id="galleryId">
+
+<div class="modal-grid">
+<div class="field">
+<label for="galleryTitle">Title</label>
+<input class="input" type="text" id="galleryTitle" required maxlength="160">
+</div>
+
+<div class="field">
+<label for="galleryDisplayOrder">Display Order</label>
+<input class="input" type="number" id="galleryDisplayOrder" min="0" step="1" value="0" required>
+</div>
+</div>
+
+<div class="field">
+<label for="galleryDescription">Description</label>
+<textarea class="textarea" id="galleryDescription" placeholder="Short gallery description"></textarea>
+</div>
+
+<div class="modal-grid">
+<div class="field">
+<label for="galleryStatus">Visibility</label>
+<select class="select" id="galleryStatus">
+<option value="Visible">Visible</option>
+<option value="Hidden">Hidden</option>
+</select>
+</div>
+
+<div class="field">
+<label for="galleryImage">Gallery Image</label>
+<input class="file-input" type="file" id="galleryImage" accept="image/jpeg,image/png,image/webp">
+</div>
+</div>
+
+<div class="preview-box">
+<img class="preview-image" id="galleryImagePreview" alt="Gallery preview" hidden>
+<p class="helper-text">Accepted formats: JPG, JPEG, PNG, WEBP. Images are resized and optimized by the backend.</p>
+</div>
+
+<div class="page-message info" id="galleryFormMessage" hidden></div>
+
+<div class="form-actions">
+<button class="button btn-outline" type="button" data-close-modal>Cancel</button>
+<button class="button btn-primary" type="submit" id="saveGalleryButton">Save Gallery Image</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+
+
+<script src="js/common.js"></script>
+<script src="js/gallery.js"></script>
+
+</body>
+
+</html>

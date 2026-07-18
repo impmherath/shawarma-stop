@@ -14,6 +14,18 @@ router.get('/:id', productController.getOne);
 router.use(requireAuth);
 
 router.post('/', upload.single('image'), productRules, validate, productController.create);
+router.post('/upload-image', upload.single('image'), (req, res) => {
+	if (!req.file) {
+		return res.status(400).json({ error: 'Product image is required' });
+	}
+
+	const crypto = require('crypto');
+	const { processProductImage } = require('../utils/imageProcessor');
+
+	processProductImage(req.file.buffer, crypto.randomUUID())
+		.then((image) => res.status(201).json({ image: image.full, thumbnail: image.thumb }))
+		.catch((error) => res.status(500).json({ error: error.message || 'Unable to process image' }));
+});
 router.put('/:id', upload.single('image'), productRules, validate, productController.update);
 router.delete('/:id', productController.remove);
 

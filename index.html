@@ -652,97 +652,282 @@
 
 <script>
 
-// ---------- Menu data ----------
-// NOTE: added a unique `id` to each item (required so the new cart can
-// track quantities per item). Nothing else in this array was changed.
-const MENU = [
-  {id:1, name:"Classic Chicken Shawarma", desc:"Grilled chicken, garlic sauce, pickles, fresh veg, warm pita.", price:3.50, cat:"shawarma", badge:"Best Seller"},
-  {id:2, name:"Beef Shawarma", desc:"Slow-roasted beef, tahini, onions, sumac, soft flatbread.", price:4.00, cat:"shawarma"},
-  {id:3, name:"Mixed Shawarma", desc:"Chicken and beef together with all the signature fixings.", price:4.50, cat:"shawarma", badge:"Best Seller"},
-  {id:4, name:"Shawarma Plate", desc:"Your choice of shawarma with rice, salad, and garlic sauce.", price:6.00, cat:"bowls"},
-  {id:5, name:"Chicken Burger", desc:"Grilled chicken fillet, lettuce, tomato, house sauce, brioche bun.", price:4.25, cat:"burgers"},
-  {id:6, name:"Crispy Chicken Burger", desc:"Crunchy fried fillet, pickles, spicy mayo, toasted bun.", price:4.75, cat:"burgers", badge:"Best Seller"},
-  {id:7, name:"Loaded Fries", desc:"Crispy fries topped with cheese sauce, shawarma bits, and herbs.", price:3.75, cat:"burgers"},
-  {id:8, name:"Chicken Rice Bowl", desc:"Grilled chicken over spiced rice with fresh salad and sauce.", price:5.00, cat:"bowls"},
-  {id:9, name:"Cheese Wrap", desc:"Melted cheese, grilled veg, and sauce rolled in warm flatbread.", price:3.25, cat:"bowls"},
-  {id:10, name:"Family Combo Meal", desc:"4 wraps, loaded fries, and drinks — built for sharing.", price:15.00, cat:"bowls", badge:"Combo"},
-  {id:11, name:"Fresh Juice", desc:"Seasonal fruit, cold-pressed daily, no added sugar.", price:2.00, cat:"drinks"},
-  {id:12, name:"Soft Drinks", desc:"Ice-cold sodas and refreshers to complete your meal.", price:1.25, cat:"drinks"},
-];
+const apiBase = `${window.location.protocol === 'file:' ? 'http:' : window.location.protocol}//${window.location.hostname || '127.0.0.1'}:5000/api`;
+const menuGrid = document.getElementById('menu-grid');
+const menuEmpty = document.getElementById('menu-empty');
+const filterGroup = document.getElementById('filter-group');
+let filterIndicator = document.getElementById('filter-indicator');
 
+const galleryGrid = document.getElementById('gallery-grid');
+const galleryFilterGroup = document.getElementById('gallery-filter-group');
+const galleryFilterIndicator = document.getElementById('gallery-filter-indicator');
+const lightbox = document.getElementById('lightbox');
+const lbPanel = lightbox.querySelector('.lb-panel');
+const lbMedia = document.getElementById('lb-media');
+const lbTitle = document.getElementById('lb-title');
+const lbCount = document.getElementById('lb-count');
+const searchInput = document.getElementById('menu-search');
 
+let MENU = [];
+let galleryItems = [];
+let galleryFiltered = [];
+let lbIndex = 0;
 
+function formatMoney(amount) {
+  return `Rs.${Number(amount || 0).toLocaleString('en-LK', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`;
+}
 
-const iconFor = (cat) => ({
-  shawarma: `<path stroke-linecap="round" stroke-linejoin="round" d="M12 3c3 1 5 3 5 7 0 5-3 8-5 11-2-3-5-6-5-11 0-4 2-6 5-7z"/>`,
-  burgers: `<path stroke-linecap="round" stroke-linejoin="round" d="M4 10h16M4 14h16M3 10a9 4 0 0118 0M3 14a1 1 0 000 4h18a1 1 0 000-4"/>`,
-  bowls: `<path stroke-linecap="round" stroke-linejoin="round" d="M4 12a8 8 0 0016 0H4z"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 12a8 4 0 0116 0"/>`,
-  drinks: `<path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10l-1 11a2 2 0 01-2 2H10a2 2 0 01-2-2L7 8z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 8h12l-1-3H7L6 8z"/>`,
-}[cat]);
+function slugify(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
 
-const labelFor = (cat) => ({
-  shawarma: 'Shawarma', burgers: 'Burgers & Fries', bowls: 'Wraps & Bowls', drinks: 'Beverages',
-}[cat] || cat);
+function humanize(value) {
+  return String(value || '')
+    .replace(/[-_]+/g, ' ')
+    .replace(/\b\w/g, (letter) => letter.toUpperCase())
+    .trim() || 'Menu';
+}
 
-const grid = document.getElementById('menu-grid');
-const emptyMsg = document.getElementById('menu-empty');
+function menuPlaceholder(name) {
+  return `
+    <div class="w-full h-full bg-green-600 thumb-pattern flex flex-col items-center justify-center text-center px-4">
+      <div class="w-16 h-16 rounded-full bg-cream/10 flex items-center justify-center mb-3">
+        <svg class="w-8 h-8 text-gold" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M6 7v14h12V7M9 7V4h6v3"/></svg>
+      </div>
+      <p class="text-cream font-display font-semibold text-sm leading-tight">${name}</p>
+    </div>`;
+}
+
+function galleryPlaceholder(title) {
+  return `
+    <div class="w-full h-full bg-green-700 thumb-pattern flex flex-col items-center justify-center text-center px-4">
+      <div class="w-14 h-14 rounded-full bg-cream/10 flex items-center justify-center mb-3">
+        <svg class="w-7 h-7 text-gold" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5l5-5.5 4 4 6-7 3 3.5"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 19h16"/></svg>
+      </div>
+      <p class="text-cream font-display font-semibold text-sm leading-tight">${title}</p>
+    </div>`;
+}
+
+function inferGalleryTag(item) {
+  const text = `${item.title || ''} ${item.description || ''}`.toLowerCase();
+  if (/(drink|juice|cola|beverage|soda)/.test(text)) return 'drinks';
+  if (/(space|interior|counter|table|shop|restaurant)/.test(text)) return 'space';
+  if (/(customer|people|team|person|staff|happy)/.test(text)) return 'people';
+  return 'food';
+}
+
+function moveFilterIndicator(btn){
+  if(!btn || !filterIndicator) return;
+  filterIndicator.style.width = `${btn.offsetWidth}px`;
+  filterIndicator.style.left = `${btn.offsetLeft}px`;
+}
+
+function moveGalleryIndicator(btn){
+  if(!btn) return;
+  galleryFilterIndicator.style.width = `${btn.offsetWidth}px`;
+  galleryFilterIndicator.style.left = `${btn.offsetLeft}px`;
+}
+
+function buildMenuFilters() {
+  const categories = Array.from(
+    new Map(MENU.map((item) => [item.categorySlug, item.categoryName || humanize(item.categorySlug)])).entries()
+  );
+
+  filterGroup.innerHTML = `
+    <span id="filter-indicator" class="absolute top-1.5 bottom-1.5 rounded-full bg-gradient-to-r from-green-500 to-green-600 shadow-md transition-all duration-300 ease-out"></span>
+    <button data-filter="all" class="filter-btn active-filter relative px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap text-cream">All</button>
+    ${categories.map(([slug, label]) => `<button data-filter="${slug}" class="filter-btn relative px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap text-green-700">${label}</button>`).join('')}
+  `;
+  filterIndicator = document.getElementById('filter-indicator');
+  moveFilterIndicator(filterGroup.querySelector('.active-filter'));
+}
 
 function renderMenu(filter='all', query=''){
   const q = query.trim().toLowerCase();
-  const items = MENU.filter(m => (filter==='all' || m.cat===filter) && (m.name.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q))); 
-  grid.innerHTML = items.map((m, i) => `
-    <div class="menu-card group relative bg-white rounded-[28px] overflow-hidden border border-green-50 shadow-sm hover:shadow-2xl hover:shadow-green-900/10" style="--card-delay:${Math.min(i * 60, 480)}ms">
+  const items = MENU.filter((item) => {
+    const matchesFilter = filter === 'all' || item.categorySlug === filter;
+    const matchesSearch = !q || item.name.toLowerCase().includes(q) || item.desc.toLowerCase().includes(q) || item.categoryName.toLowerCase().includes(q);
+    return matchesFilter && matchesSearch;
+  });
+
+  if (!MENU.length) {
+    menuGrid.innerHTML = `<div class="col-span-full rounded-3xl border border-green-100 bg-white/80 p-8 text-center text-ink/60">Loading menu items...</div>`;
+    menuEmpty.classList.add('hidden');
+    return;
+  }
+
+  menuGrid.innerHTML = items.map((item, index) => `
+    <div class="menu-card group relative bg-white rounded-[28px] overflow-hidden border border-green-50 shadow-sm hover:shadow-2xl hover:shadow-green-900/10" style="--card-delay:${Math.min(index * 60, 480)}ms">
       <div class="relative h-48 bg-gradient-to-br from-green-500 to-green-700 thumb-pattern overflow-hidden flex items-center justify-center">
-        ${m.badge ? `<span class="absolute top-4 left-4 bg-gold text-green-700 text-[10px] font-bold uppercase tracking-wide px-3 py-1.5 rounded-full shadow-sm z-10">${m.badge}</span>` : ''}
-        <div class="menu-card-icon">
-          <svg class="w-16 h-16 text-cream/80" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 24 24">${iconFor(m.cat)}</svg>
-        </div>
+        ${item.image ? `<img src="${item.image}" alt="${item.name}" class="absolute inset-0 w-full h-full object-cover">` : menuPlaceholder(item.name)}
+        <div class="absolute inset-0 bg-gradient-to-t from-green-900/45 via-transparent to-transparent"></div>
+        ${item.badge ? `<span class="absolute top-4 left-4 bg-gold text-green-700 text-[10px] font-bold uppercase tracking-wide px-3 py-1.5 rounded-full shadow-sm z-10">${item.badge}</span>` : ''}
         <div class="price-tag clip-tag absolute top-0 right-6 bg-gold text-green-700 font-display font-bold text-sm px-4 pt-2 shadow-lg">
-          $${m.price.toFixed(2)}
+          ${formatMoney(item.price)}
         </div>
       </div>
       <div class="p-6">
         <div class="flex items-center gap-2 mb-2">
           <span class="w-1.5 h-1.5 rounded-full bg-brick"></span>
-          <span class="text-[10px] font-bold uppercase tracking-widest text-brick/70">${labelFor(m.cat)}</span>
+          <span class="text-[10px] font-bold uppercase tracking-widest text-brick/70">${item.categoryName}</span>
         </div>
-        <h3 class="font-display font-bold text-lg text-green-700 mb-2 leading-tight">${m.name}</h3>
-        <p class="text-sm text-ink/60 mb-5 line-clamp-2">${m.desc}</p>
-        <button data-id="${m.id}" class="add-cart ripple-btn w-full inline-flex items-center justify-center gap-2 bg-green-50 group-hover:bg-brick group-hover:text-cream text-green-700 font-semibold text-sm py-2.5 rounded-full transition">
+        <h3 class="font-display font-bold text-lg text-green-700 mb-2 leading-tight">${item.name}</h3>
+        <p class="text-sm text-ink/60 mb-5 line-clamp-2">${item.desc}</p>
+        <button data-id="${item.id}" class="add-cart ripple-btn w-full inline-flex items-center justify-center gap-2 bg-green-50 group-hover:bg-brick group-hover:text-cream text-green-700 font-semibold text-sm py-2.5 rounded-full transition">
           Add to Cart
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/></svg>
         </button>
       </div>
     </div>
   `).join('');
-  emptyMsg.classList.toggle('hidden', items.length !== 0);
-}
-renderMenu();
 
-const filterGroup = document.getElementById('filter-group');
-const filterIndicator = document.getElementById('filter-indicator');
-
-function moveFilterIndicator(btn){
-  if(!btn) return;
-  filterIndicator.style.width = `${btn.offsetWidth}px`;
-  filterIndicator.style.left = `${btn.offsetLeft}px`;
+  menuEmpty.classList.toggle('hidden', items.length !== 0);
 }
-moveFilterIndicator(filterGroup.querySelector('.active-filter'));
-window.addEventListener('resize', () => moveFilterIndicator(filterGroup.querySelector('.active-filter')));
+
+async function loadMenu() {
+  try {
+    const response = await fetch(`${apiBase}/products`);
+    const data = await response.json();
+    MENU = (data.products || [])
+      .filter((product) => product.isAvailable !== false)
+      .map((product) => ({
+        id: product.id,
+        name: product.name,
+        desc: product.description || 'Freshly prepared and ready to order.',
+        price: Number(product.price) || 0,
+        categoryName: product.categoryName || 'Menu',
+        categorySlug: slugify(product.categoryName || 'menu'),
+        image: product.image || '',
+        badge: product.badge || ''
+      }));
+    window.MENU = MENU;
+    buildMenuFilters();
+    renderMenu(filterGroup.querySelector('.active-filter')?.dataset.filter || 'all', searchInput.value);
+  } catch (error) {
+    console.error(error);
+    menuGrid.innerHTML = `<div class="col-span-full rounded-3xl border border-brick/20 bg-white/80 p-8 text-center text-brick">Unable to load menu items.</div>`;
+  }
+}
 
 filterGroup.addEventListener('click', (e) => {
   const btn = e.target.closest('.filter-btn');
   if(!btn) return;
-  document.querySelectorAll('.filter-btn').forEach(b => { b.classList.remove('active-filter','text-cream'); b.classList.add('text-green-700'); });
+  document.querySelectorAll('.filter-btn').forEach((button) => { button.classList.remove('active-filter','text-cream'); button.classList.add('text-green-700'); });
   btn.classList.add('active-filter','text-cream');
   btn.classList.remove('text-green-700');
   moveFilterIndicator(btn);
-  renderMenu(btn.dataset.filter, document.getElementById('menu-search').value);
+  renderMenu(btn.dataset.filter, searchInput.value);
 });
-document.getElementById('menu-search').addEventListener('input', (e) => {
+
+searchInput.addEventListener('input', (e) => {
   const active = document.querySelector('.filter-btn.active-filter');
   renderMenu(active ? active.dataset.filter : 'all', e.target.value);
 });
+
+// ---------- Gallery ----------
+function tileInner(item){
+  if (item.image) {
+    return `<img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover ${item.objectPos || ''}" loading="lazy">`;
+  }
+  return galleryPlaceholder(item.title);
+}
+
+function renderGallery(filter='all'){
+  galleryFiltered = galleryItems.filter((item) => filter === 'all' || item.tag === filter);
+
+  if (!galleryItems.length) {
+    galleryGrid.innerHTML = `<div class="col-span-full rounded-3xl border border-green-100 bg-white/80 p-8 text-center text-ink/60">Loading gallery images...</div>`;
+    return;
+  }
+
+  galleryGrid.innerHTML = galleryFiltered.map((item, idx) => `
+    <button type="button" data-idx="${idx}" aria-label="View ${item.title}"
+      class="gallery-tile group relative rounded-2xl overflow-hidden text-left ${item.span || ''}">
+      ${tileInner(item)}
+      <div class="absolute inset-0 bg-gradient-to-t from-green-900/80 via-green-900/10 to-transparent opacity-80 group-hover:opacity-95 transition-opacity"></div>
+      <span class="absolute bottom-3 left-4 right-4 text-cream font-display font-semibold text-sm sm:text-base drop-shadow">${item.title}</span>
+      <span class="absolute top-3 right-3 w-8 h-8 rounded-full bg-cream/15 backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+        <svg class="w-4 h-4 text-cream" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/></svg>
+      </span>
+    </button>
+  `).join('');
+}
+
+async function loadGallery() {
+  try {
+    const response = await fetch(`${apiBase}/gallery`);
+    const data = await response.json();
+    galleryItems = (data.gallery || []).map((item) => ({
+      ...item,
+      tag: inferGalleryTag(item),
+      image: item.image || '',
+      span: ''
+    }));
+    renderGallery(document.querySelector('.gallery-filter-btn.active-gallery-filter')?.dataset.filter || 'all');
+  } catch (error) {
+    console.error(error);
+    galleryGrid.innerHTML = `<div class="col-span-full rounded-3xl border border-brick/20 bg-white/80 p-8 text-center text-brick">Unable to load gallery images.</div>`;
+  }
+}
+
+galleryFilterGroup.addEventListener('click', (e) => {
+  const btn = e.target.closest('.gallery-filter-btn');
+  if(!btn) return;
+  document.querySelectorAll('.gallery-filter-btn').forEach((button) => { button.classList.remove('active-gallery-filter','text-cream'); button.classList.add('text-green-700'); });
+  btn.classList.add('active-gallery-filter','text-cream');
+  btn.classList.remove('text-green-700');
+  moveGalleryIndicator(btn);
+  renderGallery(btn.dataset.filter);
+});
+
+// Lightbox
+function openLightbox(idx){
+  lbIndex = idx;
+  const item = galleryFiltered[lbIndex];
+  if(!item) return;
+  lbMedia.innerHTML = tileInner(item);
+  lbTitle.textContent = item.title;
+  lbCount.textContent = `${lbIndex + 1} / ${galleryFiltered.length}`;
+  lightbox.classList.remove('pointer-events-none');
+  lightbox.classList.add('lb-open');
+  lbPanel.classList.remove('scale-95','opacity-0');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox(){
+  lightbox.classList.remove('lb-open');
+  lightbox.classList.add('pointer-events-none');
+  lbPanel.classList.add('scale-95','opacity-0');
+  document.body.style.overflow = '';
+}
+function stepLightbox(dir){
+  lbIndex = (lbIndex + dir + galleryFiltered.length) % galleryFiltered.length;
+  openLightbox(lbIndex);
+}
+
+galleryGrid.addEventListener('click', (e) => {
+  const tile = e.target.closest('.gallery-tile');
+  if(!tile) return;
+  openLightbox(parseInt(tile.dataset.idx, 10));
+});
+document.getElementById('lb-close').addEventListener('click', closeLightbox);
+document.getElementById('lb-prev').addEventListener('click', () => stepLightbox(-1));
+document.getElementById('lb-next').addEventListener('click', () => stepLightbox(1));
+lightbox.addEventListener('click', (e) => { if(e.target === lightbox) closeLightbox(); });
+document.addEventListener('keydown', (e) => {
+  if(!lightbox.classList.contains('lb-open')) return;
+  if(e.key === 'Escape') closeLightbox();
+  if(e.key === 'ArrowLeft') stepLightbox(-1);
+  if(e.key === 'ArrowRight') stepLightbox(1);
+});
+
+loadMenu();
+loadGallery();
 
 
 // Cart toast (kept) — the badge/quantity counting itself is now handled by

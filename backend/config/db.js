@@ -70,6 +70,43 @@ async function ensureOrderStatusSchema() {
              DEFAULT 'Pending'`
         );
     }
+
+    const [productUpdatedAt] = await db.query(
+        `SELECT COUNT(*) AS count
+         FROM INFORMATION_SCHEMA.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE()
+           AND TABLE_NAME = 'products'
+           AND COLUMN_NAME = 'updated_at'`
+    );
+
+    if (!productUpdatedAt[0].count) {
+        await db.query(
+            `ALTER TABLE products
+             ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at`
+        );
+    }
+
+    const [galleryTable] = await db.query(
+        `SELECT COUNT(*) AS count
+         FROM INFORMATION_SCHEMA.TABLES
+         WHERE TABLE_SCHEMA = DATABASE()
+           AND TABLE_NAME = 'gallery'`
+    );
+
+    if (!galleryTable[0].count) {
+        await db.query(
+            `CREATE TABLE gallery (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                title VARCHAR(160) NOT NULL,
+                description TEXT,
+                image VARCHAR(255),
+                display_order INT DEFAULT 0,
+                status ENUM('Visible','Hidden') DEFAULT 'Visible',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )`
+        );
+    }
 }
 
 db.getConnection()

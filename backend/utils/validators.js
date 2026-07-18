@@ -36,6 +36,31 @@ const categoryRules = [
 ];
 
 
+// Gallery validation
+const galleryRules = [
+
+    body("title")
+        .trim()
+        .notEmpty()
+        .withMessage("Gallery title is required"),
+
+    body("description")
+        .optional({ nullable: true })
+        .trim(),
+
+    body("displayOrder")
+        .optional({ nullable: true })
+        .isInt({ min: 0 })
+        .withMessage("Display order must be a non-negative integer"),
+
+    body("status")
+        .optional({ nullable: true })
+        .isIn(["Visible", "Hidden"])
+        .withMessage("Status must be Visible or Hidden")
+
+];
+
+
 
 // Product validation
 const productRules = [
@@ -153,6 +178,7 @@ const validate = (req, res, next) => {
 module.exports = {
     loginRules,
     categoryRules,
+    galleryRules,
     productRules,
     publicOrderRules,
     orderStatusRules,

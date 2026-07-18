@@ -54,6 +54,8 @@ const categoryRoutes = require("./routes/category.routes");
 const productRoutes = require("./routes/product.routes");
 const orderRoutes = require("./routes/order.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
+const galleryRoutes = require("./routes/gallery.routes");
+const mediaRoutes = require("./routes/media.routes");
 
 
 // API Routes
@@ -62,6 +64,8 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/gallery", galleryRoutes);
+app.use("/api/media", mediaRoutes);
 
 
 // Home route

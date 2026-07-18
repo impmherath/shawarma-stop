@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shawarma Stop Media Library</title>
+
+<link rel="stylesheet" href="css/admin.css">
+
+</head>
+
+
+<body class="admin-shell" data-page="media.html">
+
+
+<aside class="admin-sidebar">
+
+<div class="brand">
+<div class="brand-mark">S</div>
+<div class="brand-copy">
+<strong>Shawarma Stop</strong>
+<small>Admin Panel</small>
+</div>
+</div>
+
+<div class="sidebar-section">
+<div class="sidebar-label">Navigation</div>
+<nav class="admin-nav">
+<a href="dashboard.html" data-nav="dashboard.html"><span class="nav-dot"></span>Dashboard</a>
+<a href="products.html" data-nav="products.html"><span class="nav-dot"></span>Products</a>
+<a href="gallery.html" data-nav="gallery.html"><span class="nav-dot"></span>Gallery</a>
+<a href="media.html" data-nav="media.html"><span class="nav-dot"></span>Media Library</a>
+<a href="categories.html" data-nav="categories.html"><span class="nav-dot"></span>Categories</a>
+<a href="orders.html" data-nav="orders.html"><span class="nav-dot"></span>Orders</a>
+</nav>
+</div>
+
+<div class="sidebar-footer">
+<p class="sidebar-note">Search, preview, replace, and remove unused product or gallery images.</p>
+<button class="button btn-ghost logout-button" type="button" data-logout-button>Logout</button>
+</div>
+
+</aside>
+
+
+<main class="admin-main">
+
+<header class="admin-topbar">
+<div class="topbar-copy">
+<h2>Media Library</h2>
+<p>Inspect all stored images with size and dimension details.</p>
+</div>
+<div class="top-actions">
+<button class="button btn-outline logout-button" type="button" data-logout-button>Logout</button>
+</div>
+</header>
+
+<div class="page-content">
+
+<section class="page-header">
+<div>
+<h1>Media Library</h1>
+<p>View every uploaded image, search by title, filter by source, preview assets, replace images, and delete unused files.</p>
+</div>
+</section>
+
+<section class="table-card">
+<div class="toolbar">
+<form id="mediaFilters" class="toolbar-actions" autocomplete="off">
+<input class="input search" type="search" id="mediaSearch" placeholder="Search images by title or description">
+<select class="select" id="mediaTypeFilter">
+<option value="all">All media</option>
+<option value="products">Products</option>
+<option value="gallery">Gallery</option>
+</select>
+<button class="button btn-outline" type="submit">Search</button>
+<button class="button btn-secondary" type="button" id="resetMedia">Reset</button>
+</form>
+<span class="chip" id="mediaCount">0 assets</span>
+</div>
+
+<div class="page-message info" id="mediaMessage" hidden></div>
+<div id="mediaGrid" class="media-grid"></div>
+</section>
+
+</div>
+
+</main>
+
+
+<div class="modal" id="mediaModal" aria-hidden="true">
+<div class="modal-backdrop" data-close-media-modal></div>
+<div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="mediaModalTitle">
+<div class="modal-header">
+<div>
+<h3 id="mediaModalTitle">Media Preview</h3>
+<p class="modal-description">Preview the selected image, replace it, or delete it from storage.</p>
+</div>
+<button class="button btn-outline btn-small" type="button" data-close-media-modal>Close</button>
+</div>
+<div class="modal-body">
+<div class="media-preview-shell">
+<img class="media-preview-image" id="mediaPreviewImage" alt="Media preview">
+<div class="media-meta" id="mediaPreviewMeta"></div>
+<div class="card-actions">
+<button class="button btn-outline" type="button" id="replaceMediaButton">Replace Image</button>
+<button class="button btn-danger" type="button" id="deleteMediaButton">Delete Image</button>
+</div>
+<input class="hidden" type="file" id="replaceMediaInput" accept="image/jpeg,image/png,image/webp">
+</div>
+</div>
+</div>
+</div>
+
+
+<script src="js/common.js"></script>
+<script src="js/media.js"></script>
+
+</body>
+
+</html>
